@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPM成就系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0c2e 0%, #1a1a4a 50%, #0c0c2e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(74, 110, 224, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(106, 74, 240, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            position: relative;
+        }
+        
+        .glowing-text {
+            font-size: 48px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 15px #4a6ee0,
+                0 0 20px #4a6ee0,
+                0 0 25px #4a6ee0,
+                0 0 30px #4a6ee0,
+                0 0 35px #4a6ee0;
+            animation: glow-pulse 2s infinite alternate;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes glow-pulse {
+            from {
+                text-shadow: 
+                    0 0 5px #fff,
+                    0 0 10px #fff,
+                    0 0 15px #4a6ee0,
+                    0 0 20px #4a6ee0,
+                    0 0 25px #4a6ee0,
+                    0 0 30px #4a6ee0,
+                    0 0 35px #4a6ee0;
+            }
+            to {
+                text-shadow: 
+                    0 0 10px #fff,
+                    0 0 20px #fff,
+                    0 0 30px #6a4af0,
+                    0 0 40px #6a4af0,
+                    0 0 50px #6a4af0,
+                    0 0 60px #6a4af0,
+                    0 0 70px #6a4af0;
+            }
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            color: #a0a0e0;
+            margin-bottom: 30px;
+        }
+        
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .achievement-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .achievement-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #4a6ee0, #6a4af0);
+        }
+        
+        .achievement-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(74, 110, 224, 0.3);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .achievement-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: #4a6ee0;
+            text-align: center;
+        }
+        
+        .achievement-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .achievement-desc {
+            color: #c0c0e0;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .achievement-progress {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4a6ee0, #6a4af0);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+        
+        .achievement-status {
+            display: flex;
+            justify-content: space-between;
+            color: #a0a0e0;
+            font-size: 14px;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4a6ee0 0%, #6a4af0 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(74, 110, 224, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-unlock {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+        
+        .btn-unlock:hover {
+            box-shadow: 0 7px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .btn-king {
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            color: #333;
+        }
+        
+        .btn-king:hover {
+            box-shadow: 0 7px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .unlocked {
+            border: 2px solid #2ecc71;
+        }
+        
+        .unlocked::before {
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+        }
+        
+        .king-achievement {
+            border: 2px solid #ffd700;
+        }
+        
+        .king-achievement::before {
+            background: linear-gradient(90deg, #ffd700, #ffa500);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        
+        .notification.warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .login-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            margin: 0 auto 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #c0c0e0;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #4a6ee0;
+        }
+        
+        .login-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #a0a0e0;
+        }
+        
+        .login-info h4 {
+            color: #4a6ee0;
+            margin-bottom: 10px;
+        }
+        
+        .login-info ul {
+            padding-left: 20px;
+        }
+        
+        .login-info li {
+            margin-bottom: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #8080a0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 768px) {
+            .glowing-text {
+                font-size: 36px;
+            }
+            
+            .achievement-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="glowing-text">CPM成就系统</h1>
+            <p class="subtitle">解锁您的游戏成就，展示您的实力</p>
+        </header>
+        
+        <section class="login-section">
+            <h2 style="margin-bottom: 20px; text-align: center;">账号登录</h2>
+            <div class="input-group">
+                <label for="email">游戏邮箱地址</label>
+                <input type="email" id="email" placeholder="请输入您的游戏邮箱">
+            </div>
+            <div class="input-group">
+                <label for="password">游戏密码</label>
+                <input type="password" id="password" placeholder="请输入您的游戏密码">
+            </div>
+            <button class="btn" id="login-btn">登录游戏账号</button>
+            
+            <div class="login-info">
+                <h4>测试账号信息：</h4>
+                <ul>
+                    <li>邮箱: player1@cpm.com | 密码: cpm123</li>
+                    <li>邮箱: vip@cpm.com | 密码: vip456</li>
+                    <li>邮箱: king@cpm.com | 密码: king789</li>
+                </ul>
+                <p style="margin-top: 10px; color: #e74c3c;">注意：必须使用正确的游戏账号才能解锁成就！</p>
+            </div>
+        </section>
+        
+        <section class="achievement-grid" id="achievement-section">
+            <!-- King成就 -->
+            <div class="achievement-card king-achievement">
+                <div class="achievement-icon">👑</div>
+                <h3 class="achievement-title">KING OF THE ROAD</h3>
+                <p class="achievement-desc">成为道路之王，在所有比赛中获得第一名，展示您的驾驶技巧。</p>
+                <div class="achievement-progress">
+                    <div class="progress-bar" id="king-progress"></div>
+                </div>
+                <div class="achievement-status">
+                    <span>进度</span>
+                    <span id="king-percent">0%</span>
+                </div>
+                <button class="btn btn-king disabled" id="king-btn">请先登录游戏账号</button>
+            </div>
+            
+            <!-- 漂移大师 -->
+            <div class="achievement-card">
+                <div class="achievement-icon">🌀</div>
+                <h3 class="achievement-title">漂移大师</h3>
+                <p class="achievement-desc">完成1000次完美漂移，展示您的车辆控制技巧。</p>
+                <div class="achievement-progress">
+                    <div class="progress-bar" id="drift-progress"></div>
+                </div>
+                <div class="achievement-status">
+                    <span>进度</span>
+                    <span id="drift-percent">0%</span>
+                </div>
+                <button class="btn disabled" id="drift-btn">请先登录游戏账号</button>
+            </div>
+            
+            <!-- 车辆收藏家 -->
+            <div class="achievement-card">
+                <div class="achievement-icon">🚗</div>
+                <h3 class="achievement-title">车辆收藏家</h3>
+                <p class="achievement-desc">收集游戏中的所有车辆，成为真正的汽车爱好者。</p>
+                <div class="achievement-progress">
+                    <div class="progress-bar" id="collector-progress"></div>
+                </div>
+                <div class="achievement-status">
+                    <span>进度</span>
+                    <span id="collector-percent">0%</span>
+                </div>
+                <button class="btn disabled" id="collector-btn">请先登录游戏账号</button>
+            </div>
+            
+            <!-- 完美停车 -->
+            <div class="achievement-card">
+                <div class="achievement-icon">🅿️</div>
+                <h3 class="achievement-title">完美停车</h3>
+                <p class="achievement-desc">完成500次完美停车，没有任何碰撞或越线。</p>
+                <div class="achievement-progress">
+                    <div class="progress-bar" id="parking-progress"></div>
+                </div>
+                <div class="achievement-status">
+                    <span>进度</span>
+                    <span id="parking-percent">0%</span>
+                </div>
+                <button class="btn disabled" id="parking-btn">请先登录游戏账号</button>
+            </div>
+            
+            <!-- 速度之王 -->
+            <div class="achievement-card">
+                <div class="achievement-icon">💨</div>
+                <h3 class="achievement-title">速度之王</h3>
+                <p class="achievement-desc">在计时赛中达到最高速度记录，突破极限。</p>
+                <div class="achievement-progress">
+                    <div class="progress-bar" id="speed-progress"></div>
+                </div>
+                <div class="achievement-status">
+                    <span>进度</span>
+                    <span id="speed-percent">0%</span>
+                </div>
+                <button class="btn disabled" id="speed-btn">请先登录游戏账号</button>
+            </div>
+            
+            <!-- 多人在线 -->
+            <div class="achievement-card">
+                <div class="achievement-icon">👥</div>
+                <h3 class="achievement-title">多人在线</h3>
+                <p class="achievement-desc">与100位不同玩家进行在线比赛，体验多人游戏的乐趣。</p>
+                <div class="achievement-progress">
+                    <div class="progress-bar" id="multiplayer-progress"></div>
+                </div>
+                <div class="achievement-status">
+                    <span>进度</span>
+                    <span id="multiplayer-percent">0%</span>
+                </div>
+                <button class="btn disabled" id="multiplayer-btn">请先登录游戏账号</button>
+            </div>
+        </section>
+        
+        <footer>
+            <p>© 2025 CPM成就系统. 保留所有权利.</p>
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // 游戏API接口
+        const API_URL = 'https://us-central1-cp-multiplayer.cloudfunctions.net/SavePlayerRecordsPartially6';
+        
+        // 有效的游戏账号
+        const validAccounts = {
+            'player1@cpm.com': 'cpm123',
+            'vip@cpm.com': 'vip456', 
+            'king@cpm.com': 'king789'
+        };
+        
+        // DOM元素
+        const loginBtn = document.getElementById('login-btn');
+        const achievementSection = document.getElementById('achievement-section');
+        const notification = document.getElementById('notification');
+        
+        // 成就按钮
+        const achievementButtons = [
+            'king-btn', 'drift-btn', 'collector-btn', 
+            'parking-btn', 'speed-btn', 'multiplayer-btn'
+        ];
+        
+        // 成就进度数据
+        const achievements = {
+            'king': { progress: 0, max: 100, element: 'king-progress', percent: 'king-percent' },
+            'drift': { progress: 0, max: 100, element: 'drift-progress', percent: 'drift-percent' },
+            'collector': { progress: 0, max: 100, element: 'collector-progress', percent: 'collector-percent' },
+            'parking': { progress: 0, max: 100, element: 'parking-progress', percent: 'parking-percent' },
+            'speed': { progress: 0, max: 100, element: 'speed-progress', percent: 'speed-percent' },
+            'multiplayer': { progress: 0, max: 100, element: 'multiplayer-progress', percent: 'multiplayer-percent' }
+        };
+        
+        // 当前登录状态
+        let isLoggedIn = false;
+        let currentUser = null;
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查是否有已保存的登录状态
+            checkSavedLogin();
+            
+            // 登录按钮事件
+            loginBtn.addEventListener('click', function() {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                if (!email || !password) {
+                    showNotification('请输入游戏邮箱和密码', 'error');
+                    return;
+                }
+                
+                // 验证游戏账号
+                validateGameAccount(email, password);
+            });
+            
+            // 成就按钮事件
+            achievementButtons.forEach(btnId => {
+                document.getElementById(btnId).addEventListener('click', function() {
+                    if (!isLoggedIn) {
+                        showNotification('请先登录游戏账号', 'error');
+                        return;
+                    }
+                    
+                    const achievementId = btnId.split('-')[0];
+                    unlockAchievement(achievementId);
+                });
+            });
+            
+            // King成就特殊处理
+            document.getElementById('king-btn').addEventListener('click', function() {
+                if (!isLoggedIn) {
+                    showNotification('请先登录游戏账号', 'error');
+                    return;
+                }
+                
+                unlockKingAchievement();
+            });
+        });
+        
+        // 验证游戏账号
+        function validateGameAccount(email, password) {
+            showNotification('验证游戏账号中...', 'warning');
+            
+            // 模拟API调用延迟
+            setTimeout(() => {
+                if (validAccounts[email] && validAccounts[email] === password) {
+                    // 登录成功
+                    isLoggedIn = true;
+                    currentUser = email;
+                    
+                    // 保存登录状态
+                    localStorage.setItem('cpm_logged_in', 'true');
+                    localStorage.setItem('cpm_user', email);
+                    
+                    showNotification('游戏账号验证成功！成就系统已激活', 'success');
+                    
+                    // 启用成就按钮
+                    enableAchievementButtons();
+                    
+                    // 加载用户进度
+                    loadUserProgress(email);
+                    
+                } else {
+                    // 登录失败
+                    showNotification('游戏账号或密码错误！请使用正确的游戏账号', 'error');
+                    disableAchievementButtons();
+                }
+            }, 1500);
+        }
+        
+        // 检查保存的登录状态
+        function checkSavedLogin() {
+            const savedLogin = localStorage.getItem('cpm_logged_in');
+            const savedUser = localStorage.getItem('cpm_user');
+            
+            if (savedLogin === 'true' && savedUser) {
+                // 自动登录
+                isLoggedIn = true;
+                currentUser = savedUser;
+                document.getElementById('email').value = savedUser;
+                showNotification(`欢迎回来，${savedUser}！`, 'success');
+                enableAchievementButtons();
+                loadUserProgress(savedUser);
+            }
+        }
+        
+        // 启用成就按钮
+        function enableAchievementButtons() {
+            achievementButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                btn.classList.remove('disabled');
+                btn.textContent = btnId === 'king-btn' ? '立即解锁KING成就' : '解锁成就';
+            });
+        }
+        
+        // 禁用成就按钮
+        function disableAchievementButtons() {
+            achievementButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                btn.classList.add('disabled');
+                btn.textContent = '请先登录游戏账号';
+            });
+        }
+        
+        // 解锁成就
+        function unlockAchievement(achievementId) {
+            const achievement = achievements[achievementId];
+            
+            // 如果成就已经完成
+            if (achievement.progress >= 100) {
+                showNotification('该成就已经完成！', 'error');
+                return;
+            }
+            
+            // 增加进度
+            const newProgress = Math.min(achievement.progress + 25, 100);
+            updateProgress(achievementId, newProgress);
+            
+            // 调用游戏API
+            callGameAPI(achievementId, newProgress);
+            
+            // 显示通知
+            if (newProgress >= 100) {
+                showNotification(`恭喜！${getAchievementName(achievementId)}成就已解锁！`, 'success');
+                document.querySelector(`#${achievementId}-btn`).classList.add('btn-unlock');
+                document.querySelector(`#${achievementId}-btn`).textContent = '已解锁';
+            } else {
+                showNotification(`${getAchievementName(achievementId)}进度已更新：${newProgress}%`, 'success');
+            }
+            
+            // 保存用户进度
+            saveUserProgress(currentUser);
+        }
+        
+        // 解锁King成就
+        function unlockKingAchievement() {
+            updateProgress('king', 100);
+            callGameAPI('king', 100);
+            showNotification('KING成就已解锁！您现在是道路之王！', 'success');
+            document.getElementById('king-btn').classList.add('btn-unlock');
+            document.getElementById('king-btn').textContent = '已解锁';
+            saveUserProgress(currentUser);
+        }
+        
+        // 调用游戏API
+        function callGameAPI(achievementId, progress) {
+            const requestData = {
+                data: btoa(JSON.stringify({
+                    achievement: achievementId,
+                    progress: progress,
+                    user: currentUser,
+                    timestamp: new Date().getTime()
+                }))
+            };
+            
+            // 模拟API调用
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getAuthToken()
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('游戏API响应:', data);
+            })
+            .catch(error => {
+                console.error('API调用失败:', error);
+            });
+        }
+        
+        // 更新进度显示
+        function updateProgress(achievementId, progress) {
+            const achievement = achievements[achievementId];
+            achievement.progress = progress;
+            
+            const progressBar = document.getElementById(achievement.element);
+            const percentElement = document.getElementById(achievement.percent);
+            
+            // 更新进度条
+            progressBar.style.width = `${progress}%`;
+            percentElement.textContent = `${progress}%`;
+        }
+        
+        // 获取成就名称
+        function getAchievementName(achievementId) {
+            const names = {
+                'king': 'KING OF THE ROAD',
+                'drift': '漂移大师',
+                'collector': '车辆收藏家',
+                'parking': '完美停车',
+                'speed': '速度之王',
+                'multiplayer': '多人在线'
+            };
+            
+            return names[achievementId] || achievementId;
+        }
+        
+        // 显示通知
+        function showNotification(message, type) {
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 获取认证令牌（模拟）
+        function getAuthToken() {
+            return 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYyYjM2Y2Q4MDcyOWliLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vY3AtbXVsdGlwbGF5ZXIiLCJhdWQiOiJjcC1tdWx0aXBsYXllciIsImF1dGhfdGltZSI6MTc2MDM0Mzc3MCwidXNlcl9pZCI6Iktwb3hoVEZqcTRVV3o1WFdxVWZQSihCeXF3RTMiLCJzdWIiOiJLeC94aFRGanEOVVd6NVhXcWFmUEpYQnkd0UzliwiaWF0IjoxNzYwMzQzNzcwLCJleHAiOjE3NjAzNDczNzAsImVtYWlsIjoiemlsMTg1NjIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInppbDE4NTYyM0BnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.pibhlDZe4DF2ewAjXLTJe3r69VRPCrEey2r56J8u2Dbm4PQpwvAabVKzdM4wB9iYlwkL_HLIX7pvCnn_IF7hLobZqp2iAKi65XDjYY3WpyGE7zjEMDevThbhd9r8UMwsYazkeVeFTAu_yME';
+        }
+        
+        // 保存用户进度到本地存储
+        function saveUserProgress(user) {
+            const progressData = {};
+            Object.keys(achievements).forEach(key => {
+                progressData[key] = achievements[key].progress;
+            });
+            
+            localStorage.setItem(`cpm_achievements_${user}`, JSON.stringify(progressData));
+        }
+        
+        // 从本地存储加载用户进度
+        function loadUserProgress(user) {
+            const savedProgress = localStorage.getItem(`cpm_achievements_${user}`);
+            
+            if (savedProgress) {
+                const progressData = JSON.parse(savedProgress);
+                
+                Object.keys(progressData).forEach(key => {
+                    if (achievements[key]) {
+                        updateProgress(key, progressData[key]);
+                        
+                        // 如果成就已完成，更新按钮状态
+                        if (progressData[key] >= 100) {
+                            document.querySelector(`#${key}-btn`).classList.add('btn-unlock');
+                            document.querySelector(`#${key}-btn`).textContent = '已解锁';
+                        }
+                    }
+                });
+            } else {
+                // 新用户，随机生成一些初始进度
+                Object.keys(achievements).forEach(key => {
+                    const randomProgress = Math.floor(Math.random() * 30);
+                    updateProgress(key, randomProgress);
+                });
+                
+                // 保存初始进度
+                saveUserProgress(user);
+            }
+        }
+    </script>
+</body>
+</html>
