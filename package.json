@@ -1,0 +1,8 @@
+{
+  "name": "cpm-achievement-system",
+  "version": "1.0.0",
+  "description": "CPM游戏成就系统",
+  "scripts": {
+    "start": "npx serve -s ."
+  }
+}
