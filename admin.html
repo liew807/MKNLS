@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摄像头系统管理后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2575fc;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .records {
+            margin-top: 30px;
+        }
+        
+        .record-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .record-info {
+            flex: 1;
+        }
+        
+        .record-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .view-btn {
+            background: #28a745;
+            color: white;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .refresh-btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+        
+        .photo-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 70vh;
+        }
+        
+        .close-btn {
+            background: #dc3545;
+            color: white;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📷 摄像头系统管理后台</h1>
+        
+        <button class="refresh-btn" onclick="loadData()">🔄 刷新数据</button>
+        
+        <div class="stats" id="stats">
+            <!-- 统计信息将在这里显示 -->
+        </div>
+        
+        <div class="records">
+            <h2>上传记录</h2>
+            <div id="records-list">
+                <!-- 记录将在这里显示 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="photo-modal" id="photoModal">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="查看的图片">
+            <button class="close-btn" onclick="closeModal()">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        
+        async function loadData() {
+            try {
+                // 加载统计信息
+                const statsResponse = await fetch(`${API_BASE}/stats`);
+                const statsData = await statsResponse.json();
+                
+                if (statsData.success) {
+                    displayStats(statsData.data);
+                }
+                
+                // 加载记录
+                const recordsResponse = await fetch(`${API_BASE}/records`);
+                const recordsData = await recordsResponse.json();
+                
+                if (recordsData.success) {
+                    displayRecords(recordsData.data);
+                }
+                
+            } catch (error) {
+                console.error('加载数据错误:', error);
+                alert('加载数据失败，请检查服务器是否运行');
+            }
+        }
+        
+        function displayStats(stats) {
+            const statsContainer = document.getElementById('stats');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.totalUploads}</div>
+                    <div>总上传数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${(stats.totalSize / (1024 * 1024)).toFixed(2)} MB</div>
+                    <div>总存储空间</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.uniqueIPs}</div>
+                    <div>独立IP数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.lastUpload ? new Date(stats.lastUpload).toLocaleDateString() : '无'}</div>
+                    <div>最后上传</div>
+                </div>
+            `;
+        }
+        
+        function displayRecords(records) {
+            const recordsContainer = document.getElementById('records-list');
+            
+            if (records.length === 0) {
+                recordsContainer.innerHTML = '<p>暂无上传记录</p>';
+                return;
+            }
+            
+            recordsContainer.innerHTML = records.map(record => `
+                <div class="record-item">
+                    <div class="record-info">
+                        <strong>文件:</strong> ${record.filename}<br>
+                        <strong>时间:</strong> ${new Date(record.timestamp).toLocaleString()}<br>
+                        <strong>IP:</strong> ${record.ip}<br>
+                        <strong>大小:</strong> ${(record.size / 1024).toFixed(2)} KB
+                    </div>
+                    <div class="record-actions">
+                        <button class="view-btn" onclick="viewPhoto('${record.filename}')">查看</button>
+                        <button class="delete-btn" onclick="deleteRecord('${record.filename}')">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function viewPhoto(filename) {
+            const modal = document.getElementById('photoModal');
+            const modalImage = document.getElementById('modalImage');
+            
+            modalImage.src = `http://localhost:3000/uploads/${filename}`;
+            modal.style.display = 'flex';
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('photoModal');
+            modal.style.display = 'none';
+        }
+        
+        async function deleteRecord(filename) {
+            if (!confirm('确定要删除这条记录吗？')) {
+                return;
+            }
+            
+            // 注意：这里只是从前端移除，实际应该调用删除API
+            alert('删除功能需要后端API支持');
+            // 在实际项目中，这里应该调用删除接口
+            // await fetch(`${API_BASE}/records/${filename}`, { method: 'DELETE' });
+            // loadData(); // 重新加载数据
+        }
+        
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', loadData);
+        
+        // 每30秒自动刷新数据
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>
