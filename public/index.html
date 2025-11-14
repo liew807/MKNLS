@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MKNLS强攻</title>
+<!-- 引入现代字体 -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        /* 高清科技感背景图 */
+        background: url("https://picsum.photos/id/1/1920/1080") no-repeat center center fixed;
+        background-size: cover;
+        /* 渐变蒙版提升文字可读性 */
+        background-color: rgba(0, 0, 0, 0.8);
+        background-blend-mode: overlay;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    /* 容器卡片 */
+    .center-wrapper {
+        width: 100%;
+        max-width: 450px;
+    }
+
+    .container {
+        background: rgba(17, 25, 40, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 40px 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        /* 边框发光效果 */
+        box-shadow: 0 0 20px rgba(22, 93, 255, 0.2);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .container:hover {
+        box-shadow: 0 0 30px rgba(22, 93, 255, 0.3);
+    }
+
+    /* 标题样式 */
+    .title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 30px;
+    }
+
+    /* 密钥信息样式 */
+    .license-info {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .license-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 13px;
+    }
+
+    .license-label {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .license-value {
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .license-expired {
+        color: #EF4444 !important;
+        font-weight: 600;
+    }
+
+    .license-valid {
+        color: #22C55E !important;
+        font-weight: 600;
+    }
+
+    /* 输入框样式 */
+    .input-group {
+        margin-bottom: 18px;
+        position: relative;
+    }
+
+    input {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        font-size: 15px;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #165DFF;
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.2);
+    }
+
+    /* 按钮样式 */
+    .btn {
+        width: 100%;
+        padding: 14px;
+        margin: 8px 0;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    /* 主按钮 */
+    .btn-primary {
+        background: linear-gradient(135deg, #165DFF 0%, #0F48C9 100%);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(22, 93, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #0F48C9 0%, #0A36A8 100%);
+        box-shadow: 0 6px 20px rgba(22, 93, 255, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px rgba(22, 93, 255, 0.3);
+    }
+
+    /* 菜单按钮 */
+    .btn-menu {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-menu:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    /* 退出按钮 */
+    .btn-logout {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-logout:hover {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* 状态提示 */
+    .status {
+        margin: 20px 0 10px;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        word-wrap: break-word;
+        transition: all 0.3s ease;
+    }
+
+    .status-success {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22C55E;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .status-error {
+        background: rgba(239, 68, 68, 0.15);
+        color: #EF4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* 加载动画 */
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* 隐藏/显示过渡 */
+    .form-section {
+        display: none;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .form-section.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 页脚 */
+    footer {
+        margin-top: 25px;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        opacity: 0.8;
+    }
+
+    /* 响应式优化 */
+    @media (max-width: 480px) {
+        .container {
+            padding: 30px 20px;
+            border-radius: 12px;
+        }
+
+        .title {
+            font-size: 24px;
+        }
+
+        .btn {
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        input {
+            padding: 12px 16px;
+            font-size: 14px;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="center-wrapper">
+  <div class="container">
+      <h1 class="title">👑MKNLS强攻工具👑</h1>
+      <p class="subtitle">专业高效的账号强改工具</p>
+
+      <!-- 密钥验证表单 -->
+      <div id="licenseForm" class="form-section active">
+          <div class="license-info">
+              <div class="license-item">
+                  <span class="license-label">当前版本:</span>
+                  <span class="license-value">v2.1.0</span>
+              </div>
+              <div class="license-item">
+                  <span class="license-label">授权类型:</span>
+                  <span class="license-value" id="licenseType">--</span>
+              </div>
+              <div class="license-item">
+                  <span class="license-label">到期时间:</span>
+                  <span class="license-value" id="expiryTime">--</span>
+              </div>
+              <div class="license-item">
+                  <span class="license-label">剩余使用:</span>
+                  <span class="license-value" id="remainingUses">--</span>
+              </div>
+              <div class="license-item">
+                  <span class="license-label">状态:</span>
+                  <span class="license-value" id="licenseStatus">未验证</span>
+              </div>
+          </div>
+          
+          <div class="input-group">
+              <input type="text" id="licenseKey" placeholder="请输入授权密钥" required>
+          </div>
+          <button class="btn btn-primary" id="verifyBtn" onclick="handleLicenseVerify()">
+              <span id="verifyBtnText">验证密钥</span>
+              <span class="spinner" id="verifySpinner" style="display: none;"></span>
+          </button>
+      </div>
+
+      <!-- 登录表单 -->
+      <div id="loginForm" class="form-section">
+          <div class="input-group">
+              <input type="email" id="email" placeholder="请输入邮箱" required>
+          </div>
+          <div class="input-group">
+              <input type="password" id="password" placeholder="请输入密码" required>
+          </div>
+          <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">
+              <span id="loginBtnText">登录</span>
+              <span class="spinner" id="loginSpinner" style="display: none;"></span>
+          </button>
+      </div>
+
+      <!-- 菜单按钮区 -->
+      <div id="menuButtons" class="form-section">
+          <button class="btn btn-menu" onclick="handleKingRank()">👑 秒刷king</button>
+          <button class="btn btn-menu" onclick="handleChangeEmail()">📧 强改邮箱</button>
+          <button class="btn btn-menu" onclick="handleChangePassword()">🔐 强改密码</button>
+          <button class="btn btn-logout" onclick="handleLogout()">🚪 退出登录</button>
+      </div>
+
+      <!-- 状态提示 -->
+      <div id="status" class="status"></div>
+
+      <footer>© 2025 CPM MKNLS. 保留所有权利。</footer>
+  </div>
+</div>
+
+<script>
+// 后端API地址
+const API_BASE_URL = "/api";
+
+let currentUser = null;
+let currentToken = null;
+let currentLicense = null;
+let licenseExpiry = null;
+let licenseType = null;
+let sessionId = null;
+let remainingUses = 0;
+
+// 更新状态提示
+function updateStatus(message, isError = false) {
+    const statusEl = document.getElementById('status');
+    statusEl.textContent = message;
+    statusEl.className = `status ${isError ? 'status-error' : 'status-success'}`;
+    // 3秒后自动清除非错误提示
+    if (!isError) {
+        setTimeout(() => {
+            statusEl.textContent = '';
+            statusEl.className = 'status';
+        }, 3000);
+    }
+}
+
+// 显示/隐藏加载状态
+function setLoading(state, btnId, btnTextId, spinnerId) {
+    const btn = document.getElementById(btnId);
+    const btnText = document.getElementById(btnTextId);
+    const spinner = document.getElementById(spinnerId);
+    
+    if (state) {
+        btn.disabled = true;
+        btnText.style.display = 'none';
+        spinner.style.display = 'block';
+    } else {
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        spinner.style.display = 'none';
+    }
+}
+
+// 切换表单区域
+function switchSection(showId, hideId) {
+    document.getElementById(showId).classList.add('active');
+    document.getElementById(hideId).classList.remove('active');
+}
+
+// 更新许可证信息显示
+function updateLicenseInfo(licenseData = null) {
+    const expiryTimeEl = document.getElementById('expiryTime');
+    const licenseStatusEl = document.getElementById('licenseStatus');
+    const licenseTypeEl = document.getElementById('licenseType');
+    const remainingUsesEl = document.getElementById('remainingUses');
+    
+    if (licenseData) {
+        const now = new Date();
+        const expiryDate = new Date(licenseData.expiry);
+        expiryDate.setHours(23, 59, 59, 999);
+        
+        const isValid = expiryDate > now;
+        
+        expiryTimeEl.textContent = licenseData.expiry;
+        expiryTimeEl.className = `license-value ${isValid ? 'license-valid' : 'license-expired'}`;
+        licenseStatusEl.textContent = isValid ? '有效' : '已过期';
+        licenseStatusEl.className = `license-value ${isValid ? 'license-valid' : 'license-expired'}`;
+        licenseTypeEl.textContent = licenseData.type || '--';
+        remainingUsesEl.textContent = `${licenseData.remainingUses || 0}次`;
+        remainingUsesEl.className = `license-value ${(licenseData.remainingUses || 0) > 0 ? 'license-valid' : 'license-expired'}`;
+        
+    } else {
+        expiryTimeEl.textContent = '--';
+        expiryTimeEl.className = 'license-value';
+        licenseStatusEl.textContent = '未验证';
+        licenseStatusEl.className = 'license-value';
+        licenseTypeEl.textContent = '--';
+        remainingUsesEl.textContent = '--';
+        remainingUsesEl.className = 'license-value';
+    }
+}
+
+// 验证许可证密钥 - 调用后端API
+async function handleLicenseVerify() {
+    const licenseKey = document.getElementById('licenseKey').value.trim();
+    
+    if (!licenseKey) {
+        return updateStatus("请输入授权密钥！", true);
+    }
+    
+    // 显示加载状态
+    setLoading(true, 'verifyBtn', 'verifyBtnText', 'verifySpinner');
+    updateStatus("正在验证密钥...");
+    
+    try {
+        // 调用后端验证接口
+        const response = await fetch(`${API_BASE_URL}/verify-license`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ licenseKey })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "无效的授权密钥！");
+        }
+
+        // 保存许可证信息
+        currentLicense = data.data.key;
+        licenseExpiry = data.data.expiry;
+        licenseType = data.data.type;
+        sessionId = data.data.sessionId;
+        remainingUses = data.data.remainingUses;
+
+        updateLicenseInfo(data.data);
+        updateStatus("密钥验证成功！");
+
+        // 2秒后切换到登录界面
+        setTimeout(() => {
+            switchSection('loginForm', 'licenseForm');
+        }, 2000);
+        
+    } catch (error) {
+        updateStatus(`验证失败：${error.message}`, true);
+    } finally {
+        setLoading(false, 'verifyBtn', 'verifyBtnText', 'verifySpinner');
+    }
+}
+
+// 检查会话状态 - 调用后端API
+async function checkSession() {
+    if (!sessionId) {
+        return { valid: false, message: "会话无效" };
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/check-session`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId })
+        });
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        return { success: false, message: "会话检查失败" };
+    }
+}
+
+// 检查许可证状态
+async function checkLicense() {
+    if (!sessionId) {
+        updateStatus("请先验证授权密钥！", true);
+        switchSection('licenseForm', 'loginForm');
+        return false;
+    }
+    
+    const sessionCheck = await checkSession();
+    if (!sessionCheck.success) {
+        updateStatus(sessionCheck.data?.message || "会话无效，请重新验证密钥", true);
+        switchSection('licenseForm', 'menuButtons');
+        return false;
+    }
+    
+    return true;
+}
+
+// 登录处理 - 调用后端API
+async function handleLogin() {
+    if (!sessionId) {
+        return updateStatus("请先验证授权密钥！", true);
+    }
+    
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    // 前端基础验证
+    if (!email || !password) {
+        return updateStatus("请输入邮箱和密码！", true);
+    }
+    if (!/^[\w.-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(email)) {
+        return updateStatus("请输入有效的邮箱格式！", true);
+    }
+
+    // 显示加载状态
+    setLoading(true, 'loginBtn', 'loginBtnText', 'loginSpinner');
+    updateStatus("正在登录...");
+
+    try {
+        // 调用后端登录接口（包含sessionId）
+        const response = await fetch(`${API_BASE_URL}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                email, 
+                password,
+                sessionId 
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "登录失败，请检查账号密码！");
+        }
+
+        // 保存用户信息
+        currentUser = data.data.email;
+        currentToken = data.data.idToken;
+
+        // 切换到菜单界面
+        switchSection('menuButtons', 'loginForm');
+        updateStatus(`登录成功！欢迎回来，${currentUser}`);
+
+        // 清空输入框
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+
+    } catch (error) {
+        updateStatus(`登录失败：${error.message}`, true);
+    } finally {
+        // 隐藏加载状态
+        setLoading(false, 'loginBtn', 'loginBtnText', 'loginSpinner');
+    }
+}
+
+// 验证登录状态
+function checkLogin() {
+    if (!currentUser || !currentToken) {
+        updateStatus("请先登录！", true);
+        return false;
+    }
+    return true;
+}
+
+// 设置国王等级 - 调用后端API
+async function handleKingRank() {
+    if (!checkLogin()) return;
+
+    // 检查会话状态
+    const sessionCheck = await checkSession();
+    if (!sessionCheck.success) {
+        updateStatus(sessionCheck.data?.message || "会话无效，请重新验证密钥", true);
+        switchSection('licenseForm', 'menuButtons');
+        return;
+    }
+
+    updateStatus("正在设置国王等级...");
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/king-rank`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${currentToken}`
+            },
+            body: JSON.stringify({
+                sessionId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "设置国王等级失败！");
+        }
+
+        updateStatus("国王等级设置成功！");
+
+    } catch (error) {
+        updateStatus(`操作失败：${error.message}`, true);
+    }
+}
+
+// 修改邮箱 - 调用后端API
+async function handleChangeEmail() {
+    if (!checkLogin()) return;
+
+    // 检查会话状态
+    const sessionCheck = await checkSession();
+    if (!sessionCheck.success) {
+        updateStatus(sessionCheck.data?.message || "会话无效，请重新验证密钥", true);
+        switchSection('licenseForm', 'menuButtons');
+        return;
+    }
+
+    const newEmail = prompt("请输入新邮箱：");
+    if (!newEmail) return;
+    if (!/^[\w.-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(newEmail)) {
+        return updateStatus("请输入有效的邮箱格式！", true);
+    }
+
+    updateStatus("正在修改邮箱...");
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/change-email`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                idToken: currentToken,
+                newEmail,
+                sessionId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "修改邮箱失败！");
+        }
+
+        // 更新当前用户信息
+        currentUser = newEmail;
+        currentToken = data.data.idToken;
+
+        updateStatus(`邮箱已成功修改为：${newEmail}`);
+
+    } catch (error) {
+        updateStatus(`修改失败：${error.message}`, true);
+    }
+}
+
+// 修改密码 - 调用后端API
+async function handleChangePassword() {
+    if (!checkLogin()) return;
+
+    // 检查会话状态
+    const sessionCheck = await checkSession();
+    if (!sessionCheck.success) {
+        updateStatus(sessionCheck.data?.message || "会话无效，请重新验证密钥", true);
+        switchSection('licenseForm', 'menuButtons');
+        return;
+    }
+
+    const newPassword = prompt("请输入新密码（至少6位）：");
+    if (!newPassword) return;
+    if (newPassword.length < 6) {
+        return updateStatus("密码长度不能少于6位！", true);
+    }
+
+    updateStatus("正在修改密码...");
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/change-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                idToken: currentToken,
+                newPassword,
+                sessionId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "修改密码失败！");
+        }
+
+        // 更新token
+        currentToken = data.data.idToken;
+
+        updateStatus("密码修改成功！请重新登录验证");
+
+    } catch (error) {
+        updateStatus(`修改失败：${error.message}`, true);
+    }
+}
+
+// 退出登录
+function handleLogout() {
+    currentUser = null;
+    currentToken = null;
+    currentLicense = null;
+    licenseExpiry = null;
+    licenseType = null;
+    sessionId = null;
+    remainingUses = 0;
+    switchSection('loginForm', 'menuButtons');
+    updateLicenseInfo(); // 重置显示
+    updateStatus("已成功退出登录");
+}
+
+// 页面加载完成
+document.addEventListener("DOMContentLoaded", () => {
+    // 初始化许可证信息显示
+    updateLicenseInfo();
+    
+    // 为输入框添加回车功能
+    document.getElementById('licenseKey').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleLicenseVerify();
+    });
+    
+    document.getElementById('password').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
+});
+</script>
+</body>
+</html>
