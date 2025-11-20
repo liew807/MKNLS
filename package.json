@@ -1,0 +1,22 @@
+{
+  "name": "mj-tool-backend",
+  "version": "1.0.0",
+  "description": "MJ工具平台后端服务",
+  "main": "server.js",
+  "scripts": {
+    "start": "node -e \"setTimeout(() => { console.log('服务器延迟启动中...'); require('./server.js'); }, 8000)\"",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=16.x"
+  }
+}
