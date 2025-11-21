@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MKNLS2.0强攻</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .center-wrapper {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .container {
+            background: rgba(17, 25, 40, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(22, 93, 255, 0.2);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 0 30px rgba(22, 93, 255, 0.3);
+        }
+
+        .brand-image {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .brand-image:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #165DFF;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #165DFF 0%, #0F48C9 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(22, 93, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0F48C9 0%, #0A36A8 100%);
+            box-shadow: 0 6px 20px rgba(22, 93, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(22, 93, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22C55E;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .btn-success:hover {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .btn-warning:hover {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-admin:hover {
+            background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .status {
+            margin: 20px 0 10px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            word-wrap: break-word;
+            transition: all 0.3s ease;
+        }
+
+        .status-success {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22C55E;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .status-info {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .form-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .key-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .key-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .key-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .key-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .key-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .key-code {
+            font-family: monospace;
+            font-weight: bold;
+            color: #22C55E;
+        }
+
+        .key-status {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .expired {
+            color: #EF4444;
+        }
+
+        .valid {
+            color: #22C55E;
+        }
+
+        .log-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .log-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .log-time {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-role {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .role-admin {
+            background: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+        }
+
+        .role-user {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22C55E;
+        }
+
+        footer {
+            margin-top: 25px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            opacity: 0.8;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                border-radius: 12px;
+            }
+
+            .brand-image {
+                max-width: 250px;
+                margin-bottom: 15px;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            input, select, textarea {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .brand-image {
+                max-width: 200px;
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="center-wrapper">
+    <div class="container">
+        <!-- 品牌图片 -->
+        <img src="https://i.postimg.cc/5y5z7HSt/IMG-4274.jpg" alt="品牌标志" class="brand-image">
+        
+        <h1 class="title"><i class="fas fa-key"></i> MKNLS2.0强攻</h1>
+        <p class="subtitle">MKNLS2.0独家验证系统</p>
+
+        <!-- 密钥验证表单 -->
+        <div id="keyVerificationForm" class="form-section active">
+            <div class="input-group">
+                <input type="text" id="licenseKey" placeholder="请输入用户许可证密钥" required>
+            </div>
+            <button class="btn btn-primary" id="verifyKeyBtn" onclick="verifyUserKey()">
+                <span id="verifyKeyBtnText">验证用户密钥</span>
+                <span class="spinner" id="verifyKeySpinner" style="display: none;"></span>
+            </button>
+
+            <div style="margin: 20px 0; text-align: center;">
+                <span style="color: rgba(255,255,255,0.5);">或</span>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="adminKey" placeholder="请输入管理员登录密钥" required>
+            </div>
+            <button class="btn btn-admin" id="adminKeyBtn" onclick="verifyAdminKey()">
+                <span id="adminKeyBtnText">管理员登录</span>
+                <span class="spinner" id="adminKeySpinner" style="display: none;"></span>
+            </button>
+        </div>
+
+        <!-- 登录表单 -->
+        <div id="loginForm" class="form-section">
+            <div class="input-group">
+                <input type="email" id="email" placeholder="请输入邮箱" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="请输入密码" required>
+            </div>
+            <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">
+                <span id="loginBtnText">登录</span>
+                <span class="spinner" id="loginSpinner" style="display: none;"></span>
+            </button>
+            <button class="btn btn-secondary" onclick="switchToKeyVerification()">
+                <i class="fas fa-arrow-left"></i> 返回密钥验证
+            </button>
+        </div>
+
+        <!-- 主菜单 -->
+        <div id="mainMenu" class="form-section">
+            <div class="user-info">
+                <div>
+                    <strong id="currentUser">user@example.com</strong>
+                    <span id="userRole" class="user-role role-user">玩家</span>
+                </div>
+                <div class="key-actions">
+                    <button class="action-btn" onclick="switchAccount()" title="切换账号">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+                    <button class="action-btn" onclick="switchKey()" title="切换密钥">
+                        <i class="fas fa-key"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="handleKingRank()">
+                <i class="fas fa-crown"></i> 秒刷king
+            </button>
+            <button class="btn btn-secondary" onclick="handleChangeEmail()">
+                <i class="fas fa-envelope"></i> 强改邮箱
+            </button>
+            <button class="btn btn-secondary" onclick="handleChangePassword()">
+                <i class="fas fa-lock"></i> 强改密码
+            </button>
+            <button class="btn btn-danger" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt"></i> 退出登录
+            </button>
+        </div>
+
+        <!-- 密钥管理中心 -->
+        <div id="keyManagementCenter" class="form-section">
+            <div class="user-info">
+                <div>
+                    <strong id="adminUser">管理员面板</strong>
+                    <span class="user-role role-admin">管理员</span>
+                </div>
+                <div class="key-actions">
+                    <button class="action-btn" onclick="switchToUserMode()" title="切换到用户模式">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <h3 style="margin: 20px 0 15px; text-align: left;">密钥管理</h3>
+            
+            <div class="input-group">
+                <input type="text" id="keyNote" placeholder="密钥备注（可选）">
+            </div>
+            <div class="input-group">
+                <input type="datetime-local" id="keyExpiry">
+            </div>
+            <div class="input-group">
+                <input type="number" id="keyMaxUsers" placeholder="最大绑定用户数（默认1）" min="1" value="1">
+            </div>
+            <button class="btn btn-success" onclick="generateNewKey()">
+                <i class="fas fa-plus"></i> 生成新密钥
+            </button>
+            <button class="btn btn-secondary" onclick="refreshKeyList()">
+                <i class="fas fa-sync-alt"></i> 刷新密钥列表
+            </button>
+            
+            <div class="key-list" id="keyListContainer">
+                <!-- 密钥列表将通过JavaScript动态生成 -->
+            </div>
+            
+            <h3 style="margin: 20px 0 15px; text-align: left;">操作日志</h3>
+            <div class="log-list" id="logListContainer">
+                <!-- 日志列表将通过JavaScript动态生成 -->
+            </div>
+            
+            <button class="btn btn-primary" onclick="switchToUserMode()">
+                <i class="fas fa-user"></i> 切换到用户模式
+            </button>
+        </div>
+
+        <!-- 状态提示 -->
+        <div id="status" class="status"></div>
+
+        <footer>© 2025 CPM MKNLS2.0. 保留所有权利。</footer>
+    </div>
+</div>
+
+<script>
+    // 后端API地址
+    const API_BASE_URL = "/api";
+
+    let currentUser = null;
+    let currentToken = null;
+    let currentRole = 'user';
+    let currentLicenseKey = null;
+    let currentSessionId = null;
+    let currentUserId = null;
+
+    // 移除示范密钥数据，改为空数组
+    let licenseKeys = [];
+    let operationLogs = [];
+
+    // 更新状态提示
+    function updateStatus(message, isError = false, isInfo = false) {
+        const statusEl = document.getElementById('status');
+        statusEl.textContent = message;
+        
+        if (isInfo) {
+            statusEl.className = 'status status-info';
+        } else {
+            statusEl.className = `status ${isError ? 'status-error' : 'status-success'}`;
+        }
+        
+        if (!isError) {
+            setTimeout(() => {
+                statusEl.textContent = '';
+                statusEl.className = 'status';
+            }, 3000);
+        }
+    }
+
+    // 显示/隐藏加载状态
+    function setLoading(state, btnId, btnTextId, spinnerId) {
+        const btn = document.getElementById(btnId);
+        const btnText = document.getElementById(btnTextId);
+        const spinner = document.getElementById(spinnerId);
+        
+        if (state) {
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+        } else {
+            btn.disabled = false;
+            btnText.style.display = 'inline';
+            spinner.style.display = 'none';
+        }
+    }
+
+    // 切换表单区域
+    function switchSection(showId) {
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(showId).classList.add('active');
+    }
+
+    // 验证用户许可证密钥
+    async function verifyUserKey() {
+        const licenseKey = document.getElementById('licenseKey').value.trim();
+
+        if (!licenseKey) {
+            return updateStatus("请输入用户许可证密钥！", true);
+        }
+
+        setLoading(true, 'verifyKeyBtn', 'verifyKeyBtnText', 'verifyKeySpinner');
+        updateStatus("正在验证用户密钥...", false, true);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/verify-key`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    licenseKey,
+                    keyType: 'user'
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "用户密钥验证失败！");
+            }
+
+            currentLicenseKey = licenseKey;
+            currentRole = 'user';
+            
+            // 显示密钥信息
+            const keyInfo = data.data;
+            let message = `密钥验证成功！`;
+            if (keyInfo.maxUsers > 1) {
+                message += ` 该密钥最多可绑定 ${keyInfo.maxUsers} 个账号，当前已绑定 ${keyInfo.currentUsers} 个`;
+            }
+            
+            switchSection('loginForm');
+            updateStatus(message);
+
+        } catch (error) {
+            updateStatus(`验证失败：${error.message}`, true);
+        } finally {
+            setLoading(false, 'verifyKeyBtn', 'verifyKeyBtnText', 'verifyKeySpinner');
+        }
+    }
+
+    // 验证管理员密钥
+    async function verifyAdminKey() {
+        const adminKey = document.getElementById('adminKey').value.trim();
+
+        if (!adminKey) {
+            return updateStatus("请输入管理员密钥！", true);
+        }
+
+        setLoading(true, 'adminKeyBtn', 'adminKeyBtnText', 'adminKeySpinner');
+        updateStatus("正在验证管理员密钥...", false, true);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/verify-admin-key`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    adminKey
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "管理员密钥验证失败！");
+            }
+
+            currentRole = 'admin';
+            currentUser = "管理员";
+            currentSessionId = data.data.sessionId;
+            
+            loadKeyManagementData();
+            switchSection('keyManagementCenter');
+            updateStatus(`管理员登录成功！欢迎进入管理面板`);
+
+        } catch (error) {
+            updateStatus(`管理员登录失败：${error.message}`, true);
+        } finally {
+            setLoading(false, 'adminKeyBtn', 'adminKeyBtnText', 'adminKeySpinner');
+        }
+    }
+
+    // 生成新密钥 - 支持自定义绑定用户数量
+    async function generateNewKey() {
+        const note = document.getElementById('keyNote').value.trim();
+        const expiryInput = document.getElementById('keyExpiry').value;
+        const maxUsers = document.getElementById('keyMaxUsers').value;
+        
+        if (!expiryInput) {
+            return updateStatus("请设置密钥过期时间！", true);
+        }
+
+        // 计算过期天数
+        const expiryDate = new Date(expiryInput);
+        const now = new Date();
+        const expiryDays = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+
+        updateStatus("正在生成新密钥...", false, true);
+
+        try {
+            const headers = {
+                "Content-Type": "application/json"
+            };
+
+            if (currentSessionId) {
+                headers["x-session-id"] = currentSessionId;
+            } else if (currentToken) {
+                headers["Authorization"] = `Bearer ${currentToken}`;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/generate-key`, {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({ 
+                    note: note || '未命名密钥',
+                    expiryDays: expiryDays,
+                    maxUsers: parseInt(maxUsers) || 1
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "生成密钥失败！");
+            }
+
+            // 清空表单
+            document.getElementById('keyNote').value = '';
+            document.getElementById('keyExpiry').value = '';
+            document.getElementById('keyMaxUsers').value = '1';
+            
+            // 刷新密钥列表
+            await refreshKeyList();
+            
+            const keyData = data.data;
+            updateStatus(`新密钥已生成：${keyData.key} (最多绑定 ${keyData.maxUsers} 个账号)`);
+
+        } catch (error) {
+            updateStatus(`生成失败：${error.message}`, true);
+        }
+    }
+
+    // 修改密钥的最大绑定用户数
+    async function updateKeyMaxUsers(key, currentMaxUsers) {
+        const newMaxUsers = prompt(`请输入新的最大绑定用户数（当前：${currentMaxUsers}）:`, currentMaxUsers);
+        if (!newMaxUsers || isNaN(newMaxUsers) || parseInt(newMaxUsers) < 1) {
+            return updateStatus("请输入有效的用户数量！", true);
+        }
+
+        updateStatus("正在更新密钥设置...", false, true);
+
+        try {
+            const headers = {
+                "Content-Type": "application/json"
+            };
+
+            if (currentSessionId) {
+                headers["x-session-id"] = currentSessionId;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/keys/${key}/max-users`, {
+                method: "PUT",
+                headers: headers,
+                body: JSON.stringify({ 
+                    maxUsers: parseInt(newMaxUsers)
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "更新失败！");
+            }
+
+            await refreshKeyList();
+            updateStatus(`密钥最大绑定用户数已更新为 ${newMaxUsers}`);
+
+        } catch (error) {
+            updateStatus(`更新失败：${error.message}`, true);
+        }
+    }
+
+    // 刷新密钥列表
+    async function refreshKeyList() {
+        try {
+            const headers = {
+                "Content-Type": "application/json"
+            };
+
+            if (currentSessionId) {
+                headers["x-session-id"] = currentSessionId;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/keys`, {
+                method: "GET",
+                headers: headers
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "获取密钥列表失败！");
+            }
+
+            licenseKeys = data.data;
+            loadKeyManagementData();
+            
+        } catch (error) {
+            updateStatus(`刷新失败：${error.message}`, true);
+        }
+    }
+
+    // 加载密钥管理数据
+    function loadKeyManagementData() {
+        const keyListContainer = document.getElementById('keyListContainer');
+        keyListContainer.innerHTML = '';
+        
+        if (licenseKeys.length === 0) {
+            keyListContainer.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">暂无密钥</div>';
+            return;
+        }
+        
+        licenseKeys.forEach(key => {
+            const keyItem = document.createElement('div');
+            keyItem.className = 'key-item';
+            
+            const isExpired = new Date(key.expiry) < new Date();
+            const statusClass = isExpired ? 'expired' : 'valid';
+            const statusText = isExpired ? '已过期' : '有效';
+            const maxUsers = key.maxUsers || 1;
+            const currentUsers = key.currentUsers || 0;
+            
+            keyItem.innerHTML = `
+                <div class="key-info">
+                    <div class="key-code">${key.key}</div>
+                    <div class="key-status ${statusClass}">
+                        状态: ${statusText} | 绑定: ${currentUsers}/${maxUsers} 用户 | 过期: ${formatDate(key.expiry)} | 备注: ${key.note}
+                    </div>
+                </div>
+                <div class="key-actions">
+                    <button class="action-btn" onclick="copyKey('${key.key}')" title="复制密钥">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button class="action-btn" onclick="updateKeyMaxUsers('${key.key}', ${maxUsers})" title="修改绑定数量">
+                        <i class="fas fa-users"></i>
+                    </button>
+                    <button class="action-btn" onclick="getKeyInfo('${key.key}')" title="查看详情">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button class="action-btn" onclick="deleteKey('${key.key}')" title="删除密钥">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            keyListContainer.appendChild(keyItem);
+        });
+    }
+
+    // 复制密钥
+    function copyKey(key) {
+        navigator.clipboard.writeText(key).then(() => {
+            updateStatus("密钥已复制到剪贴板");
+        }).catch(err => {
+            updateStatus("复制失败，请手动复制", true);
+        });
+    }
+
+    // 获取密钥信息
+    function getKeyInfo(key) {
+        const keyData = licenseKeys.find(k => k.key === key);
+        if (keyData) {
+            const isExpired = new Date(keyData.expiry) < new Date();
+            const statusText = isExpired ? '已过期' : '有效';
+            const maxUsers = keyData.maxUsers || 1;
+            const currentUsers = keyData.currentUsers || 0;
+            
+            let boundUsersInfo = '';
+            if (keyData.boundUsers && keyData.boundUsers.length > 0) {
+                boundUsersInfo = `\n已绑定用户: ${keyData.boundUsers.join(', ')}`;
+            }
+            
+            alert(`密钥信息:\n\n密钥: ${keyData.key}\n状态: ${statusText}\n绑定用户: ${currentUsers}/${maxUsers}\n过期时间: ${formatDate(keyData.expiry)}\n备注: ${keyData.note}\n创建者: ${keyData.createdBy}${boundUsersInfo}`);
+        }
+    }
+
+    // 删除密钥
+    async function deleteKey(key) {
+        if (!confirm("确定要删除这个密钥吗？此操作不可撤销！")) {
+            return;
+        }
+
+        try {
+            const headers = {
+                "Content-Type": "application/json"
+            };
+
+            if (currentSessionId) {
+                headers["x-session-id"] = currentSessionId;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/keys/${key}`, {
+                method: "DELETE",
+                headers: headers
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "删除密钥失败！");
+            }
+
+            await refreshKeyList();
+            updateStatus("密钥已成功删除");
+
+        } catch (error) {
+            updateStatus(`删除失败：${error.message}`, true);
+        }
+    }
+
+    // 格式化日期
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+    }
+
+    // 登录处理
+    async function handleLogin() {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!email || !password) {
+            return updateStatus("请输入邮箱和密码！", true);
+        }
+        if (!/^[\w.-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(email)) {
+            return updateStatus("请输入有效的邮箱格式！", true);
+        }
+
+        setLoading(true, 'loginBtn', 'loginBtnText', 'loginSpinner');
+        updateStatus("正在登录...", false, true);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    email, 
+                    password,
+                    licenseKey: currentLicenseKey
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "登录失败，请检查账号密码！");
+            }
+
+            currentUser = data.data.email;
+            currentToken = data.data.idToken;
+            currentRole = data.data.role || 'user';
+            currentSessionId = data.data.sessionId;
+            currentUserId = data.data.userId;
+
+            document.getElementById('currentUser').textContent = currentUser;
+            document.getElementById('adminUser').textContent = currentUser;
+            
+            // 显示绑定结果
+            let loginMessage = `登录成功！欢迎回来，${currentUser}`;
+            if (data.data.keyBind && data.data.keyBind.success) {
+                const bindInfo = data.data.keyBind.data;
+                loginMessage += `\n密钥绑定成功 (${bindInfo.currentUsers}/${bindInfo.maxUsers})`;
+            }
+            
+            updateUIByRole();
+            switchSection('mainMenu');
+            updateStatus(loginMessage);
+
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+
+        } catch (error) {
+            updateStatus(`登录失败：${error.message}`, true);
+        } finally {
+            setLoading(false, 'loginBtn', 'loginBtnText', 'loginSpinner');
+        }
+    }
+
+    function updateUIByRole() {
+        const userRoleEl = document.getElementById('userRole');
+        if (currentRole === 'admin') {
+            userRoleEl.textContent = '管理员';
+            userRoleEl.className = 'user-role role-admin';
+        } else {
+            userRoleEl.textContent = '玩家';
+            userRoleEl.className = 'user-role role-user';
+        }
+    }
+
+    function switchToKeyVerification() {
+        switchSection('keyVerificationForm');
+        updateStatus("请验证密钥", false, true);
+    }
+
+    function switchToUserMode() {
+        currentUser = null;
+        currentToken = null;
+        currentRole = 'user';
+        currentLicenseKey = null;
+        currentSessionId = null;
+        currentUserId = null;
+        
+        switchSection('keyVerificationForm');
+        document.getElementById('licenseKey').value = '';
+        document.getElementById('adminKey').value = '';
+        updateStatus("请重新验证密钥", false, true);
+    }
+
+    function switchAccount() {
+        currentUser = null;
+        currentToken = null;
+        currentRole = 'user';
+        currentLicenseKey = null;
+        currentSessionId = null;
+        currentUserId = null;
+        
+        switchSection('keyVerificationForm');
+        document.getElementById('licenseKey').value = '';
+        document.getElementById('adminKey').value = '';
+        updateStatus("请重新验证密钥并登录", false, true);
+    }
+
+    function switchKey() {
+        currentLicenseKey = null;
+        switchSection('keyVerificationForm');
+        document.getElementById('licenseKey').value = '';
+        document.getElementById('adminKey').value = '';
+        updateStatus("请输入新的许可证密钥", false, true);
+    }
+
+    // 其他功能函数保持不变...
+    async function handleKingRank() {
+        if (!currentToken) {
+            return updateStatus("请先登录！", true);
+        }
+        // ... 原有代码
+    }
+
+    async function handleChangeEmail() {
+        if (!currentToken) {
+            return updateStatus("请先登录！", true);
+        }
+        // ... 原有代码
+    }
+
+    async function handleChangePassword() {
+        if (!currentToken) {
+            return updateStatus("请先登录！", true);
+        }
+        // ... 原有代码
+    }
+
+    function handleLogout() {
+        currentUser = null;
+        currentToken = null;
+        currentRole = 'user';
+        currentLicenseKey = null;
+        currentSessionId = null;
+        currentUserId = null;
+        switchSection('keyVerificationForm');
+        document.getElementById('licenseKey').value = '';
+        document.getElementById('adminKey').value = '';
+        updateStatus("已退出登录");
+    }
+
+    // 页面加载完成
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('licenseKey').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') verifyUserKey();
+        });
+        
+        document.getElementById('adminKey').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') verifyAdminKey();
+        });
+        
+        document.getElementById('password').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        
+        // 设置默认过期时间为7天后
+        const defaultExpiry = new Date();
+        defaultExpiry.setDate(defaultExpiry.getDate() + 7);
+        document.getElementById('keyExpiry').value = defaultExpiry.toISOString().slice(0, 16);
+    });
+</script>
+</body>
+</html>
