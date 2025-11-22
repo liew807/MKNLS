@@ -1,0 +1,970 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const fetch = require('node-fetch');
+const { Pool } = require('pg');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// 中间件
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*',
+    credentials: true
+}));
+app.use(express.json());
+app.use(express.static('public'));
+
+// 验证环境变量 - 只验证必要的
+const requiredEnv = ['FIREBASE_API_KEY', 'RANK_URL'];
+const missingEnv = requiredEnv.filter(key => !process.env[key]);
+if (missingEnv.length > 0) {
+    console.error('缺少必要环境变量：', missingEnv.join(', '));
+    process.exit(1); 
+}
+
+// PostgreSQL 连接
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+// 初始化数据库表
+async function initDatabase() {
+    try {
+        // 创建访问密钥表
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS access_keys (
+                id SERIAL PRIMARY KEY,
+                key VARCHAR(50) UNIQUE NOT NULL,
+                remark TEXT,
+                expiry_time TIMESTAMP NOT NULL,
+                status VARCHAR(20) DEFAULT 'active',
+                is_admin BOOLEAN DEFAULT FALSE,
+                is_super_admin BOOLEAN DEFAULT FALSE,
+                is_test_card BOOLEAN DEFAULT FALSE,
+                duration_hours INTEGER DEFAULT 24,
+                max_bind INTEGER DEFAULT 3,
+                bound_emails TEXT[] DEFAULT '{}',
+                added_by VARCHAR(100),
+                added_by_name VARCHAR(100),
+                added_by_email VARCHAR(100),
+                card_type VARCHAR(50) DEFAULT 'STANDARD',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                bound_accounts JSONB DEFAULT '[]'
+            )
+        `);
+
+        // 创建操作日志表
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS operation_logs (
+                id SERIAL PRIMARY KEY,
+                action VARCHAR(100) NOT NULL,
+                user_email VARCHAR(100) NOT NULL,
+                key_used VARCHAR(50),
+                details TEXT,
+                log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 创建活跃会话表
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS active_sessions (
+                session_id VARCHAR(100) PRIMARY KEY,
+                user_id VARCHAR(100) NOT NULL,
+                email VARCHAR(100) NOT NULL,
+                role VARCHAR(20) NOT NULL,
+                is_super_admin BOOLEAN DEFAULT FALSE,
+                start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        console.log('✅ 数据库表初始化完成');
+    } catch (error) {
+        console.error('❌ 数据库初始化失败:', error);
+    }
+}
+
+// 数据操作函数
+async function getAllAccessKeys() {
+    const result = await pool.query('SELECT * FROM access_keys ORDER BY created_at DESC');
+    return result.rows;
+}
+
+async function getAccessKey(key) {
+    const result = await pool.query('SELECT * FROM access_keys WHERE key = $1', [key]);
+    return result.rows[0];
+}
+
+async function createAccessKey(keyData) {
+    const query = `
+        INSERT INTO access_keys (
+            key, remark, expiry_time, status, is_admin, is_super_admin, 
+            is_test_card, duration_hours, max_bind, added_by, added_by_name, 
+            added_by_email, card_type, bound_emails, bound_accounts
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        RETURNING *
+    `;
+    
+    const values = [
+        keyData.key,
+        keyData.remark,
+        keyData.expiryTime,
+        keyData.status || 'active',
+        keyData.isAdmin || false,
+        keyData.isSuperAdmin || false,
+        keyData.isTestCard || false,
+        keyData.durationHours || 24,
+        keyData.maxBind || 3,
+        keyData.addedBy,
+        keyData.addedByName,
+        keyData.addedByEmail,
+        keyData.cardType || 'STANDARD',
+        keyData.boundEmails || [],
+        JSON.stringify(keyData.boundAccounts || [])
+    ];
+    
+    const result = await pool.query(query, values);
+    return result.rows[0];
+}
+
+async function updateAccessKey(key, updates) {
+    const setClause = [];
+    const values = [];
+    let paramCount = 1;
+
+    for (const [field, value] of Object.entries(updates)) {
+        if (field === 'boundAccounts') {
+            setClause.push(`bound_accounts = $${paramCount}`);
+            values.push(JSON.stringify(value));
+        } else if (field === 'boundEmails') {
+            setClause.push(`bound_emails = $${paramCount}`);
+            values.push(value);
+        } else {
+            setClause.push(`${field} = $${paramCount}`);
+            values.push(value);
+        }
+        paramCount++;
+    }
+
+    values.push(key);
+    const query = `UPDATE access_keys SET ${setClause.join(', ')} WHERE key = $${paramCount} RETURNING *`;
+    const result = await pool.query(query, values);
+    return result.rows[0];
+}
+
+async function deleteAccessKey(key) {
+    const result = await pool.query('DELETE FROM access_keys WHERE key = $1', [key]);
+    return result.rowCount > 0;
+}
+
+async function addOperationLog(log) {
+    const query = `
+        INSERT INTO operation_logs (action, user_email, key_used, details, log_time)
+        VALUES ($1, $2, $3, $4, $5)
+    `;
+    
+    const values = [
+        log.action,
+        log.user,
+        log.key,
+        log.details,
+        log.time
+    ];
+    
+    await pool.query(query, values);
+}
+
+// 密钥生成函数
+function generateAccessKey() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let key = '';
+    for (let i = 0; i < 15; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return key;
+}
+
+// 超级管理员密钥（硬编码，不需要环境变量）
+const SUPER_ADMIN_KEY = 'cpmMKNLS';
+
+// 初始化数据库
+initDatabase();
+
+// 1. 检查秘钥接口
+app.post('/api/check-key', async (req, res) => {
+    try {
+        const { key, email } = req.body;
+
+        if (!key) {
+            return res.status(400).json({
+                success: false,
+                message: "请提供访问秘钥"
+            });
+        }
+
+        // 使用硬编码的超级管理员密钥
+        if (key === SUPER_ADMIN_KEY) {
+            const sessionId = 'super_admin_' + Date.now();
+            
+            await pool.query(`
+                INSERT INTO active_sessions (session_id, user_id, email, role, is_super_admin, start_time, last_activity)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `, [sessionId, 'admin', 'administrator', 'admin', true, new Date(), new Date()]);
+
+            await addOperationLog({
+                action: 'admin_login',
+                user: 'administrator',
+                key: 'ADMIN_KEY',
+                details: '管理员通过密钥登录',
+                time: new Date().toISOString()
+            });
+
+            return res.json({
+                success: true,
+                data: {
+                    role: 'admin',
+                    sessionId,
+                    message: "管理员登录成功"
+                }
+            });
+        }
+
+        // 检查普通秘钥
+        const keyData = await getAccessKey(key);
+        
+        if (!keyData) {
+            return res.status(400).json({
+                success: false,
+                message: "秘钥不存在"
+            });
+        }
+        
+        if (keyData.status !== 'active') {
+            return res.status(400).json({
+                success: false,
+                message: "秘钥已失效"
+            });
+        }
+        
+        if (new Date(keyData.expiry_time) < new Date()) {
+            await updateAccessKey(key, { status: 'expired' });
+            return res.status(400).json({
+                success: false,
+                message: "秘钥已过期"
+            });
+        }
+
+        // 检查绑定状态
+        const boundEmails = keyData.bound_emails || [];
+        const isEmailBound = email && boundEmails.includes(email);
+        const bindCount = boundEmails.length;
+        const maxBind = keyData.max_bind || 3;
+        const remainingBinds = Math.max(0, maxBind - bindCount);
+
+        // 如果是管理员秘钥
+        if (keyData.is_admin) {
+            const sessionId = 'admin_' + Date.now();
+            await pool.query(`
+                INSERT INTO active_sessions (session_id, user_id, email, role, is_super_admin, start_time, last_activity)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `, [sessionId, keyData.added_by || 'admin', keyData.added_by_email || 'admin@mknls.com', 'admin', keyData.is_super_admin || false, new Date(), new Date()]);
+
+            await addOperationLog({
+                action: 'admin_login',
+                user: keyData.added_by || 'admin',
+                key: key,
+                details: '管理员登录',
+                time: new Date().toISOString()
+            });
+
+            return res.json({
+                success: true,
+                message: "管理员登录成功",
+                isAdmin: true,
+                isSuperAdmin: keyData.is_super_admin || false,
+                needsChoice: true,
+                isTestCard: keyData.is_test_card || false
+            });
+        }
+
+        // 普通用户秘钥
+        await addOperationLog({
+            action: 'key_verification',
+            user: email || 'unknown',
+            key: key,
+            details: '秘钥验证成功',
+            time: new Date().toISOString()
+        });
+
+        res.json({
+            success: true,
+            message: "秘钥验证成功",
+            expiryTime: keyData.expiry_time,
+            isAdmin: false,
+            isTestCard: keyData.is_test_card || false,
+            bindCount,
+            maxBind,
+            remainingBinds,
+            isEmailBound,
+            durationHours: keyData.duration_hours,
+            cardType: keyData.card_type
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// 2. 登录接口
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password, key } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "请提供邮箱和密码"
+            });
+        }
+
+        // 验证Firebase账号
+        const firebaseResponse = await fetch(
+            `https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=${process.env.FIREBASE_API_KEY}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    returnSecureToken: true
+                })
+            }
+        );
+
+        const firebaseData = await firebaseResponse.json();
+
+        if (!firebaseResponse.ok) {
+            throw new Error(
+                firebaseData.error?.message || "登录失败，请检查账号密码"
+            );
+        }
+
+        const sessionId = 'user_session_' + Date.now();
+        await pool.query(`
+            INSERT INTO active_sessions (session_id, user_id, email, role, is_super_admin, start_time, last_activity)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `, [sessionId, firebaseData.localId, firebaseData.email, 'user', false, new Date(), new Date()]);
+
+        // 如果提供了秘钥，绑定邮箱到秘钥
+        if (key) {
+            const keyData = await getAccessKey(key);
+            if (keyData) {
+                const boundEmails = keyData.bound_emails || [];
+                if (!boundEmails.includes(email)) {
+                    if (boundEmails.length >= (keyData.max_bind || 3)) {
+                        throw new Error("该秘钥绑定数量已达上限");
+                    }
+                    
+                    const newBoundEmails = [...boundEmails, email];
+                    let boundAccounts = keyData.bound_accounts || [];
+                    if (typeof boundAccounts === 'string') {
+                        boundAccounts = JSON.parse(boundAccounts);
+                    }
+                    
+                    boundAccounts.push({
+                        email: email,
+                        password: Buffer.from(password).toString('base64'),
+                        bindTime: new Date().toISOString(),
+                        lastLogin: new Date().toISOString()
+                    });
+                    
+                    await updateAccessKey(key, {
+                        bound_emails: newBoundEmails,
+                        bound_accounts: boundAccounts
+                    });
+                }
+            }
+        }
+
+        await addOperationLog({
+            action: 'user_login',
+            user: email,
+            key: key || 'N/A',
+            details: '用户登录系统',
+            time: new Date().toISOString()
+        });
+
+        res.json({
+            success: true,
+            data: {
+                email: firebaseData.email,
+                userId: firebaseData.localId,
+                idToken: firebaseData.idToken,
+                sessionId,
+                role: 'user',
+                expiresIn: firebaseData.expiresIn
+            }
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// 3. 修改邮箱接口
+app.post('/api/change-email', async (req, res) => {
+    try {
+        const { idToken, newEmail, oldEmail, key } = req.body;
+
+        if (!idToken || !newEmail) {
+            return res.status(400).json({
+                success: false,
+                message: "请提供完整的参数"
+            });
+        }
+
+        if (!/^[\w.-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(newEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "请输入有效的邮箱格式"
+            });
+        }
+
+        // 检查是否是测试卡
+        if (key) {
+            const keyData = await getAccessKey(key);
+            if (keyData && keyData.is_test_card) {
+                return res.status(403).json({
+                    success: false,
+                    message: "测试卡不支持修改邮箱功能"
+                });
+            }
+        }
+
+        const firebaseResponse = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${process.env.FIREBASE_API_KEY}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    idToken,
+                    email: newEmail,
+                    returnSecureToken: true
+                })
+            }
+        );
+
+        const firebaseData = await firebaseResponse.json();
+
+        if (!firebaseResponse.ok) {
+            throw new Error(
+                firebaseData.error?.message || "修改邮箱失败"
+            );
+        }
+
+        res.json({
+            success: true,
+            data: {
+                email: firebaseData.email,
+                idToken: firebaseData.idToken
+            }
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// 4. 修改密码接口
+app.post('/api/change-password', async (req, res) => {
+    try {
+        const { idToken, newPassword, email, key } = req.body;
+
+        if (!idToken || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "请提供完整的参数"
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: "密码长度不能少于6位"
+            });
+        }
+
+        // 检查是否是测试卡
+        if (key) {
+            const keyData = await getAccessKey(key);
+            if (keyData && keyData.is_test_card) {
+                return res.status(403).json({
+                    success: false,
+                    message: "测试卡不支持修改密码功能"
+                });
+            }
+        }
+
+        const firebaseResponse = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${process.env.FIREBASE_API_KEY}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    idToken,
+                    password: newPassword,
+                    returnSecureToken: true
+                })
+            }
+        );
+
+        const firebaseData = await firebaseResponse.json();
+
+        if (!firebaseResponse.ok) {
+            throw new Error(
+                firebaseData.error?.message || "修改密码失败"
+            );
+        }
+
+        res.json({
+            success: true,
+            data: {
+                idToken: firebaseData.idToken
+            }
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// 5. 设置国王等级接口
+app.post('/api/king-rank', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({
+                success: false,
+                message: "请提供有效的身份令牌"
+            });
+        }
+
+        const idToken = authHeader.split(' ')[1];
+
+        const ratingData = {
+            "cars": 100000, "car_fix": 100000, "car_collided": 100000, "car_exchange": 100000,
+            "car_trade": 100000, "car_wash": 100000, "slicer_cut": 100000, "drift_max": 100000,
+            "drift": 100000, "cargo": 100000, "delivery": 100000, "taxi": 100000, "levels": 100000,
+            "gifts": 100000, "fuel": 100000, "offroad": 100000, "speed_banner": 100000,
+            "reactions": 100000, "police": 100000, "run": 100000, "real_estate": 100000,
+            "t_distance": 100000, "treasure": 100000, "block_post": 100000, "push_ups": 100000,
+            "burnt_tire": 100000, "passanger_distance": 100000, "time": 10000000000, "race_win": 3000
+        };
+
+        const rankResponse = await fetch(process.env.RANK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+                'User-Agent': 'okhttp/3.12.13'
+            },
+            body: JSON.stringify({
+                data: JSON.stringify({ RatingData: ratingData })
+            })
+        });
+
+        if (!rankResponse.ok) {
+            throw new Error(`等级设置接口返回错误：${rankResponse.statusText}`);
+        }
+
+        res.json({
+            success: true,
+            message: "国王等级设置成功"
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// 6. 管理员功能接口
+app.post('/api/admin/keys', async (req, res) => {
+    try {
+        const { key } = req.query;
+        const { durationHours, maxBind, remark, isTestCard } = req.body;
+
+        if (!key) {
+            return res.status(400).json({
+                success: false,
+                message: "请提供管理员秘钥"
+            });
+        }
+
+        // 验证管理员权限
+        let isSuperAdmin = false;
+        let adminInfo = null;
+
+        if (key === SUPER_ADMIN_KEY) {
+            isSuperAdmin = true;
+            adminInfo = { name: '超级管理员', key: SUPER_ADMIN_KEY };
+        } else {
+            const keyData = await getAccessKey(key);
+            if (!keyData || !keyData.is_admin) {
+                return res.status(403).json({
+                    success: false,
+                    message: "无管理员权限"
+                });
+            }
+            isSuperAdmin = keyData.is_super_admin || false;
+            adminInfo = { 
+                name: keyData.added_by_name || '管理员', 
+                key: keyData.added_by || 'unknown',
+                email: keyData.added_by_email 
+            };
+        }
+
+        // 生成新秘钥
+        const newKey = generateAccessKey();
+        const now = new Date();
+        
+        let actualDuration = durationHours || 24;
+        let actualMaxBind = maxBind || 3;
+        
+        if (isTestCard) {
+            actualDuration = 1;
+            actualMaxBind = 1;
+        }
+        
+        const expiryTime = new Date(now);
+        expiryTime.setHours(expiryTime.getHours() + actualDuration);
+
+        const keyData = {
+            key: newKey,
+            remark: remark || (isTestCard ? '测试卡' : '普通秘钥'),
+            expiryTime: expiryTime.toISOString(),
+            status: 'active',
+            isAdmin: false,
+            isSuperAdmin: false,
+            isTestCard: isTestCard || false,
+            durationHours: actualDuration,
+            maxBind: actualMaxBind,
+            boundEmails: [],
+            boundAccounts: [],
+            addedBy: adminInfo.key,
+            addedByName: adminInfo.name,
+            addedByEmail: adminInfo.email,
+            cardType: isTestCard ? 'TEST_CARD' : (actualDuration >= 24 * 30 ? 'DIAMOND_EXCLUSIVE' : 'STANDARD')
+        };
+
+        await createAccessKey(keyData);
+        
+        await addOperationLog({
+            action: 'generate_key',
+            user: adminInfo.name,
+            key: newKey,
+            details: `生成${isTestCard ? '测试卡' : '秘钥'}：${remark || '无备注'}`,
+            time: new Date().toISOString()
+        });
+
+        res.json({
+            success: true,
+            key: newKey,
+            message: `${isTestCard ? '测试卡' : '秘钥'}生成成功`
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// 7. 管理员获取秘钥列表
+app.get('/api/admin/keys', async (req, res) => {
+    try {
+        const { key } = req.query;
+
+        if (!key) {
+            return res.status(400).json({
+                success: false,
+                message: "请提供管理员秘钥"
+            });
+        }
+
+        // 验证管理员权限
+        let isSuperAdmin = false;
+        let adminInfo = null;
+
+        if (key === SUPER_ADMIN_KEY) {
+            isSuperAdmin = true;
+            adminInfo = { name: '超级管理员', key: SUPER_ADMIN_KEY };
+        } else {
+            const keyData = await getAccessKey(key);
+            if (!keyData || !keyData.is_admin) {
+                return res.status(403).json({
+                    success: false,
+                    message: "无管理员权限"
+                });
+            }
+            isSuperAdmin = keyData.is_super_admin || false;
+            adminInfo = { 
+                name: keyData.added_by_name || '管理员', 
+                key: keyData.added_by || 'unknown' 
+            };
+        }
+
+        // 获取所有秘钥
+        const allKeys = await getAllAccessKeys();
+        
+        // 分类秘钥
+        const tgKeys = allKeys.filter(k => k.added_by === 'telegram_bot');
+        const superAdminKeys = allKeys.filter(k => k.is_super_admin);
+        const normalAdminKeys = allKeys.filter(k => k.is_admin && !k.is_super_admin && k.added_by !== 'telegram_bot');
+        
+        const normalAdmins = {};
+        normalAdminKeys.forEach(keyData => {
+            const adminKey = keyData.added_by;
+            if (!normalAdmins[adminKey]) {
+                normalAdmins[adminKey] = {
+                    adminKey: adminKey,
+                    adminName: keyData.added_by_name || '未知管理员',
+                    keys: []
+                };
+            }
+            normalAdmins[adminKey].keys.push(keyData);
+        });
+
+        await addOperationLog({
+            action: 'fetch_keys',
+            user: adminInfo.name,
+            key: key,
+            details: '获取秘钥列表',
+            time: new Date().toISOString()
+        });
+
+        res.json({
+            success: true,
+            keys: {
+                telegram: tgKeys,
+                superAdmin: superAdminKeys,
+                normalAdmins: normalAdmins
+            }
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// 8. 管理员删除秘钥
+app.delete('/api/admin/keys', async (req, res) => {
+    try {
+        const { key, keyToDelete } = req.query;
+
+        if (!key || !keyToDelete) {
+            return res.status(400).json({
+                success: false,
+                message: "请提供必要的参数"
+            });
+        }
+
+        // 验证管理员权限
+        let adminInfo = null;
+
+        if (key === SUPER_ADMIN_KEY) {
+            adminInfo = { name: '超级管理员', key: SUPER_ADMIN_KEY };
+        } else {
+            const keyData = await getAccessKey(key);
+            if (!keyData || !keyData.is_admin) {
+                return res.status(403).json({
+                    success: false,
+                    message: "无管理员权限"
+                });
+            }
+            adminInfo = { 
+                name: keyData.added_by_name || '管理员', 
+                key: keyData.added_by || 'unknown'
+            };
+        }
+
+        const keyDataToDelete = await getAccessKey(keyToDelete);
+        if (!keyDataToDelete) {
+            return res.status(400).json({
+                success: false,
+                message: "要删除的秘钥不存在"
+            });
+        }
+
+        // 检查删除权限
+        if (key !== SUPER_ADMIN_KEY && keyDataToDelete.added_by !== adminInfo.key) {
+            return res.status(403).json({
+                success: false,
+                message: "只能删除自己生成的秘钥"
+            });
+        }
+
+        await deleteAccessKey(keyToDelete);
+        
+        await addOperationLog({
+            action: 'delete_key',
+            user: adminInfo.name,
+            key: keyToDelete,
+            details: `删除秘钥：${keyDataToDelete.remark || '无备注'}`,
+            time: new Date().toISOString()
+        });
+
+        res.json({
+            success: true,
+            message: "秘钥删除成功"
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// 9. 清理过期秘钥（手动触发）
+app.post('/api/admin/cleanup-expired-keys', async (req, res) => {
+    try {
+        const { key } = req.query;
+
+        if (!key) {
+            return res.status(400).json({
+                success: false,
+                message: "请提供管理员秘钥"
+            });
+        }
+
+        // 验证管理员权限
+        let adminInfo = null;
+
+        if (key === SUPER_ADMIN_KEY) {
+            adminInfo = { name: '超级管理员', key: SUPER_ADMIN_KEY };
+        } else {
+            const keyData = await getAccessKey(key);
+            if (!keyData || !keyData.is_admin) {
+                return res.status(403).json({
+                    success: false,
+                    message: "无管理员权限"
+                });
+            }
+            adminInfo = { 
+                name: keyData.added_by_name || '管理员', 
+                key: keyData.added_by || 'unknown'
+            };
+        }
+
+        const result = await pool.query(
+            'DELETE FROM access_keys WHERE expiry_time < $1 AND status = $2',
+            [new Date(), 'active']
+        );
+
+        await addOperationLog({
+            action: 'cleanup_keys',
+            user: adminInfo.name,
+            key: 'SYSTEM',
+            details: `清理过期秘钥，共删除 ${result.rowCount} 个`,
+            time: new Date().toISOString()
+        });
+
+        res.json({
+            success: true,
+            message: `成功清理 ${result.rowCount} 个过期秘钥`,
+            deletedCount: result.rowCount
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// 健康检查接口
+app.get('/health', async (req, res) => {
+    try {
+        const keysCount = await pool.query('SELECT COUNT(*) FROM access_keys');
+        const logsCount = await pool.query('SELECT COUNT(*) FROM operation_logs');
+        const sessionsCount = await pool.query('SELECT COUNT(*) FROM active_sessions');
+        
+        res.json({ 
+            status: 'ok', 
+            message: 'Backend is running',
+            accessKeys: parseInt(keysCount.rows[0].count),
+            operationLogs: parseInt(logsCount.rows[0].count),
+            activeSessions: parseInt(sessionsCount.rows[0].count),
+            database: 'PostgreSQL'
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
+    }
+});
+
+// API状态检查接口
+app.get('/api/status', async (req, res) => {
+    try {
+        const keysCount = await pool.query('SELECT COUNT(*) FROM access_keys');
+        const logsCount = await pool.query('SELECT COUNT(*) FROM operation_logs');
+        const sessionsCount = await pool.query('SELECT COUNT(*) FROM active_sessions');
+        
+        res.json({ 
+            success: true,
+            status: 'running',
+            message: 'API后端服务已启动并正常运行',
+            timestamp: new Date().toISOString(),
+            data: {
+                accessKeys: parseInt(keysCount.rows[0].count),
+                operationLogs: parseInt(logsCount.rows[0].count),
+                activeSessions: parseInt(sessionsCount.rows[0].count),
+                uptime: process.uptime(),
+                version: '1.0.0'
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            status: 'error',
+            message: error.message
+        });
+    }
+});
+
+// 启动服务
+app.listen(PORT, async () => {
+    console.log(`🚀 后端服务已启动，端口：${PORT}`);
+    console.log(`🔑 超级管理员密钥: ${SUPER_ADMIN_KEY}`);
+    console.log('✅ 环境变量验证通过');
+    console.log('✅ 数据持久化已启用 - 使用 PostgreSQL');
+    console.log(`📡 API状态检查: http://localhost:${PORT}/api/status`);
+    console.log(`❤️  健康检查: http://localhost:${PORT}/health`);
+    console.log('🎯 服务已就绪，等待请求...');
+});
