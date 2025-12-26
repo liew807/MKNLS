@@ -1,0 +1,3666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>季伯常工具平台 V3.0 - CPM克隆增强版</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* 第一个页面的所有CSS样式 */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+        --ios-blue: #007AFF;
+        --ios-gray-1: #8E8E93;
+        --ios-gray-2: #AEAEB2;
+        --ios-gray-3: #C7C7CC;
+        --ios-gray-4: #D1D1D6;
+        --ios-gray-5: #E5E5EA;
+        --ios-gray-6: #F2F2F7;
+        --ios-red: #FF3B30;
+        --ios-orange: #FF9500;
+        --ios-green: #34C759;
+        --ios-teal: #5AC8FA;
+        --ios-purple: #AF52DE;
+        --ios-pink: #FF2D55;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #000000 !important;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 16px;
+        color: #FFFFFF;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* 霓虹光晕效果 */
+    .neon-glow {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(255, 149, 0, 0.25) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 45, 85, 0.25) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(175, 82, 222, 0.25) 0%, transparent 50%),
+            radial-gradient(circle at 60% 60%, rgba(0, 122, 255, 0.25) 0%, transparent 50%);
+        animation: glowShift 15s ease infinite;
+    }
+
+    @keyframes glowShift {
+        0%, 100% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    /* 网格背景 */
+    .grid-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 30px 30px;
+        z-index: -2;
+        opacity: 0.3;
+    }
+
+    /* 科幻粒子效果 */
+    .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        animation: float 20s linear infinite;
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(100vh) translateX(0);
+            opacity: 0;
+        }
+        10% {
+            opacity: 1;
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-100px) translateX(calc(100vw * var(--x)));
+            opacity: 0;
+        }
+    }
+
+    /* 霓虹边框卡片 */
+    .neon-card {
+        width: 100%;
+        max-width: 420px;
+        background: rgba(0, 0, 0, 0.95) !important;
+        backdrop-filter: blur(20px) saturate(200%);
+        -webkit-backdrop-filter: blur(20px) saturate(200%);
+        border-radius: 24px;
+        padding: 24px 20px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+        border: 1px solid transparent;
+        box-shadow: 
+            0 0 20px rgba(0, 122, 255, 0.3),
+            0 0 40px rgba(255, 149, 0, 0.2),
+            0 0 60px rgba(175, 82, 222, 0.1),
+            inset 0 0 20px rgba(255, 255, 255, 0.05);
+        animation: borderGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes borderGlow {
+        0% {
+            box-shadow: 
+                0 0 20px rgba(0, 122, 255, 0.3),
+                0 0 40px rgba(255, 149, 0, 0.2),
+                0 0 60px rgba(175, 82, 222, 0.1),
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+        100% {
+            box-shadow: 
+                0 0 25px rgba(0, 122, 255, 0.4),
+                0 0 50px rgba(255, 149, 0, 0.3),
+                0 0 75px rgba(175, 82, 222, 0.2),
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    /* 标题样式 - 霓虹渐变闪烁 */
+    .neon-title {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 24px;
+        letter-spacing: -0.5px;
+        background: linear-gradient(45deg, 
+            #FF9500, #FF2D55, #AF52DE, #007AFF, #34C759, 
+            #FF9500, #FF2D55, #AF52DE, #007AFF, #34C759);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        background-size: 300% 300%;
+        animation: gradientShift 5s ease infinite, textGlow 2s ease-in-out infinite alternate;
+        text-shadow: 
+            0 0 10px rgba(255, 149, 0, 0.7),
+            0 0 20px rgba(255, 149, 0, 0.5),
+            0 0 30px rgba(255, 149, 0, 0.3);
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    @keyframes textGlow {
+        0% {
+            text-shadow: 
+                0 0 10px rgba(255, 149, 0, 0.7),
+                0 0 20px rgba(255, 149, 0, 0.5),
+                0 0 30px rgba(255, 149, 0, 0.3);
+        }
+        100% {
+            text-shadow: 
+                0 0 15px rgba(255, 149, 0, 0.9),
+                0 0 30px rgba(255, 149, 0, 0.7),
+                0 0 45px rgba(255, 149, 0, 0.5),
+                0 0 60px rgba(255, 149, 0, 0.3);
+        }
+    }
+
+    /* 版本标签 - 霓虹效果 */
+    .version-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: linear-gradient(135deg, #FF9500, #FF2D55);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+        box-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+        animation: badgePulse 2s infinite;
+    }
+
+    @keyframes badgePulse {
+        0%, 100% { box-shadow: 0 0 10px rgba(255, 149, 0, 0.5); }
+        50% { box-shadow: 0 0 20px rgba(255, 149, 0, 0.8); }
+    }
+
+    /* 语言选择器 */
+    .language-selector {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    .language-dropdown {
+        background: rgba(0, 0, 0, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        padding: 8px 12px;
+        color: #FFFFFF;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        min-width: 120px;
+        box-shadow: 0 0 10px rgba(0, 122, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .language-dropdown:hover {
+        border-color: var(--ios-blue);
+        box-shadow: 0 0 15px rgba(0, 122, 255, 0.5);
+    }
+
+    .language-dropdown:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--ios-blue), 0 0 20px rgba(0, 122, 255, 0.5);
+    }
+
+    /* 首页推广信息 - 霓虹效果 */
+    .home-promotion {
+        width: 100%;
+        max-width: 420px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        background: rgba(0, 0, 0, 0.95);
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid rgba(255, 149, 0, 0.3);
+        box-shadow: 
+            0 0 20px rgba(255, 149, 0, 0.3),
+            0 0 40px rgba(255, 149, 0, 0.1),
+            inset 0 0 20px rgba(255, 149, 0, 0.05);
+        animation: promotionGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes promotionGlow {
+        0% {
+            box-shadow: 
+                0 0 20px rgba(255, 149, 0, 0.3),
+                0 0 40px rgba(255, 149, 0, 0.1),
+                inset 0 0 20px rgba(255, 149, 0, 0.05);
+        }
+        100% {
+            box-shadow: 
+                0 0 30px rgba(255, 149, 0, 0.4),
+                0 0 60px rgba(255, 149, 0, 0.2),
+                inset 0 0 30px rgba(255, 149, 0, 0.1);
+        }
+    }
+
+    .promotion-header {
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    .promotion-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        background: linear-gradient(45deg, #FF9500, #FF2D55);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+    }
+
+    .promotion-subtitle {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 16px;
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .promotion-links {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .promotion-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .promotion-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .promotion-link:hover::before {
+        left: 100%;
+    }
+
+    .promotion-link:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .promotion-link.xianyu {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 149, 0, 0.2));
+        border-color: rgba(255, 107, 53, 0.5);
+        box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+    }
+
+    .promotion-link.kuaishou {
+        background: linear-gradient(135deg, rgba(255, 45, 85, 0.2), rgba(175, 82, 222, 0.2));
+        border-color: rgba(255, 45, 85, 0.5);
+        box-shadow: 0 0 15px rgba(255, 45, 85, 0.3);
+    }
+
+    .promotion-link.tg {
+        background: linear-gradient(135deg, rgba(0, 136, 204, 0.2), rgba(52, 170, 223, 0.2));
+        border-color: rgba(0, 136, 204, 0.5);
+        box-shadow: 0 0 15px rgba(0, 136, 204, 0.3);
+    }
+
+    /* TG频道按钮 */
+    .tg-channel-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 16px;
+        margin-bottom: 16px;
+        border: none;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(0, 136, 204, 0.2), rgba(52, 170, 223, 0.2));
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: 1px solid rgba(0, 136, 204, 0.5);
+        box-shadow: 0 0 15px rgba(0, 136, 204, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tg-channel-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .tg-channel-btn:hover::before {
+        left: 100%;
+    }
+
+    .tg-channel-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 136, 204, 0.4);
+    }
+
+    /* 测试卡标签 */
+    .test-card-badge {
+        background: linear-gradient(135deg, #FF9500, #FF2D55);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: 8px;
+        box-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+        animation: badgePulse 2s infinite;
+    }
+
+    /* 改密卡标签 */
+    .password-card-badge {
+        background: linear-gradient(135deg, #34C759, #5AC8FA);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: 8px;
+        box-shadow: 0 0 10px rgba(52, 199, 89, 0.5);
+        animation: badgePulse 2s infinite;
+    }
+
+    /* 闪烁的到期时间 */
+    .blinking-expiry {
+        animation: blink 2s infinite, colorShift 3s infinite;
+        font-weight: bold;
+        text-align: center;
+        padding: 12px;
+        border-radius: 12px;
+        margin: 10px 0;
+        background: linear-gradient(45deg, 
+            #FF0000, #FF9500, #FFFF00, #34C759, #007AFF, #AF52DE,
+            #FF0000, #FF9500, #FFFF00, #34C759, #007AFF, #AF52DE);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        background-size: 400% 400%;
+        text-shadow: 0 0 10px currentColor;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    @keyframes colorShift {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 400% 50%; }
+    }
+
+    /* 状态消息 - 霓虹效果 */
+    .neon-status {
+        text-align: center;
+        padding: 16px;
+        border-radius: 16px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        font-size: 16px;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .neon-status::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1), transparent 70%);
+        animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .neon-status.error {
+        color: #FF3B30;
+        border-color: rgba(255, 59, 48, 0.5);
+        box-shadow: 
+            0 0 20px rgba(255, 59, 48, 0.3),
+            inset 0 0 20px rgba(255, 59, 48, 0.1);
+        text-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
+    }
+
+    .neon-status.success {
+        color: #34C759;
+        border-color: rgba(52, 199, 89, 0.5);
+        box-shadow: 
+            0 0 20px rgba(52, 199, 89, 0.3),
+            inset 0 0 20px rgba(52, 199, 89, 0.1);
+        text-shadow: 0 0 10px rgba(52, 199, 89, 0.5);
+    }
+
+    .neon-status.admin {
+        color: #FF9500;
+        border-color: rgba(255, 149, 0, 0.5);
+        box-shadow: 
+            0 0 20px rgba(255, 149, 0, 0.3),
+            inset 0 0 20px rgba(255, 149, 0, 0.1);
+        text-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+    }
+
+    .neon-status.super-admin {
+        color: #AF52DE;
+        border-color: rgba(175, 82, 222, 0.5);
+        box-shadow: 
+            0 0 20px rgba(175, 82, 222, 0.3),
+            inset 0 0 20px rgba(175, 82, 222, 0.1);
+        text-shadow: 0 0 10px rgba(175, 82, 222, 0.5);
+    }
+
+    .neon-status.test-card {
+        color: #FF2D55;
+        border-color: rgba(255, 45, 85, 0.5);
+        box-shadow: 
+            0 0 20px rgba(255, 45, 85, 0.3),
+            inset 0 0 20px rgba(255, 45, 85, 0.1);
+        text-shadow: 0 0 10px rgba(255, 45, 85, 0.5);
+    }
+
+    .neon-status.password-card {
+        color: #34C759;
+        border-color: rgba(52, 199, 89, 0.5);
+        box-shadow: 
+            0 0 20px rgba(52, 199, 89, 0.3),
+            inset 0 0 20px rgba(52, 199, 89, 0.1);
+        text-shadow: 0 0 10px rgba(52, 199, 89, 0.5);
+    }
+
+    /* 霓虹输入框 */
+    .neon-input {
+        width: 100%;
+        padding: 16px;
+        margin-bottom: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.8);
+        font-size: 17px;
+        transition: all 0.3s ease;
+        outline: none;
+        color: #FFFFFF;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    .neon-input:focus {
+        border-color: var(--ios-blue);
+        background: rgba(0, 0, 0, 0.9);
+        box-shadow: 
+            0 0 20px rgba(0, 122, 255, 0.5),
+            0 0 40px rgba(0, 122, 255, 0.2);
+    }
+
+    .neon-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* 霓虹按钮 */
+    .neon-button {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(0, 122, 255, 0.2), rgba(90, 200, 250, 0.2));
+        color: white;
+        font-size: 17px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 8px;
+        border: 1px solid rgba(0, 122, 255, 0.5);
+        box-shadow: 0 0 15px rgba(0, 122, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .neon-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .neon-button:hover::before {
+        left: 100%;
+    }
+
+    .neon-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 
+            0 10px 30px rgba(0, 122, 255, 0.4),
+            0 0 40px rgba(0, 122, 255, 0.2);
+    }
+
+    .neon-button:active {
+        transform: translateY(0);
+    }
+
+    .neon-button.secondary {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .neon-button.destructive {
+        background: linear-gradient(135deg, rgba(255, 59, 48, 0.2), rgba(255, 122, 112, 0.2));
+        border: 1px solid rgba(255, 59, 48, 0.5);
+        box-shadow: 0 0 15px rgba(255, 59, 48, 0.3);
+    }
+
+    .neon-button.success {
+        background: linear-gradient(135deg, rgba(52, 199, 89, 0.2), rgba(111, 207, 151, 0.2));
+        border: 1px solid rgba(52, 199, 89, 0.5);
+        box-shadow: 0 0 15px rgba(52, 199, 89, 0.3);
+    }
+
+    .neon-button.test-card {
+        background: linear-gradient(135deg, rgba(255, 149, 0, 0.2), rgba(255, 45, 85, 0.2));
+        border: 1px solid rgba(255, 149, 0, 0.5);
+        box-shadow: 0 0 15px rgba(255, 149, 0, 0.3);
+    }
+
+    .neon-button.password-card {
+        background: linear-gradient(135deg, rgba(52, 199, 89, 0.2), rgba(90, 200, 250, 0.2));
+        border: 1px solid rgba(52, 199, 89, 0.5);
+        box-shadow: 0 0 15px rgba(52, 199, 89, 0.3);
+    }
+
+    .neon-button:disabled {
+        background: rgba(142, 142, 147, 0.2);
+        color: rgba(142, 142, 147, 0.5);
+        border-color: rgba(142, 142, 147, 0.3);
+        box-shadow: none;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .neon-button:disabled::before {
+        display: none;
+    }
+
+    /* 导航按钮组 */
+    .neon-nav-buttons {
+        display: flex;
+        gap: 8px;
+        margin: 16px 0;
+    }
+
+    .neon-nav-buttons button {
+        flex: 1;
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    /* 到期时间显示 */
+    .neon-expiry {
+        text-align: center;
+        margin: 16px 0;
+        color: white;
+        font-size: 15px;
+        line-height: 1.4;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 149, 0, 0.3);
+        box-shadow: 
+            0 0 20px rgba(255, 149, 0, 0.2),
+            inset 0 0 20px rgba(255, 149, 0, 0.05);
+    }
+
+    /* 绑定信息 */
+    .neon-bind-info {
+        text-align: center;
+        margin: 12px 0;
+        color: white;
+        font-size: 15px;
+        font-weight: 500;
+        background: rgba(255, 149, 0, 0.2);
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 149, 0, 0.5);
+        box-shadow: 0 0 15px rgba(255, 149, 0, 0.3);
+        animation: bindPulse 3s infinite;
+    }
+
+    @keyframes bindPulse {
+        0%, 100% { box-shadow: 0 0 15px rgba(255, 149, 0, 0.3); }
+        50% { box-shadow: 0 0 25px rgba(255, 149, 0, 0.5); }
+    }
+
+    /* 管理员面板 */
+    .neon-admin-panel {
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        padding-top: 20px;
+        margin-top: 20px;
+    }
+
+    .neon-admin-title {
+        text-align: center;
+        font-size: 20px;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 16px;
+        background: linear-gradient(45deg, #FF9500, #AF52DE);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+    }
+
+    .admin-level-badge {
+        background: linear-gradient(135deg, #AF52DE, #007AFF);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 8px;
+        box-shadow: 0 0 10px rgba(175, 82, 222, 0.5);
+        animation: badgePulse 2s infinite;
+    }
+
+    /* CPMCY克隆工具特定样式 */
+    .clone-card {
+        display: none;
+    }
+
+    .clone-card.active {
+        display: block;
+    }
+
+    .account-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .info-box {
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(0, 122, 255, 0.3);
+        border-radius: 12px;
+        padding: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .info-box:hover {
+        border-color: var(--ios-blue);
+        box-shadow: 0 0 20px rgba(0, 122, 255, 0.3);
+        transform: translateY(-3px);
+    }
+
+    .info-label {
+        display: block;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        display: block;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        background: linear-gradient(135deg, rgba(255, 149, 0, 0.2), rgba(255, 45, 85, 0.2));
+        border: 1px solid rgba(255, 149, 0, 0.5);
+        box-shadow: 0 0 10px rgba(255, 149, 0, 0.3);
+    }
+
+    .operation-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .option-item {
+        position: relative;
+    }
+
+    .option-item input[type="radio"] {
+        display: none;
+    }
+
+    .option-item label {
+        display: block;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid rgba(106, 17, 203, 0.3);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .option-item input[type="radio"]:checked + label {
+        border-color: #6a11cb;
+        background: linear-gradient(135deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(106, 17, 203, 0.3);
+    }
+
+    .option-item label strong {
+        display: block;
+        color: #ffffff;
+        font-size: 16px;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .option-item label small {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .warning-box {
+        background: linear-gradient(135deg, rgba(255, 59, 48, 0.1), rgba(255, 122, 112, 0.1));
+        border: 2px solid rgba(255, 59, 48, 0.3);
+        color: #ff8fa3;
+        padding: 15px;
+        border-radius: 12px;
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 0 20px rgba(255, 59, 48, 0.1);
+    }
+
+    .time-warning-box {
+        background: linear-gradient(135deg, rgba(255, 149, 0, 0.1), rgba(241, 196, 15, 0.1));
+        border: 2px solid rgba(255, 149, 0, 0.3);
+        color: #ffd166;
+        padding: 15px;
+        border-radius: 12px;
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 0 20px rgba(255, 149, 0, 0.1);
+    }
+
+    .note-box {
+        background: linear-gradient(135deg, rgba(52, 199, 89, 0.1), rgba(46, 204, 113, 0.1));
+        border: 2px solid rgba(52, 199, 89, 0.3);
+        color: #7effb2;
+        padding: 15px;
+        border-radius: 12px;
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 0 20px rgba(52, 199, 89, 0.1);
+    }
+
+    .progress-container {
+        background: rgba(20, 20, 40, 0.7);
+        border-radius: 12px;
+        height: 20px;
+        overflow: hidden;
+        margin: 20px 0;
+        position: relative;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+        width: 0%;
+        transition: width 0.4s ease;
+        position: relative;
+        box-shadow: 0 0 20px rgba(106, 17, 203, 0.5);
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, 
+            transparent 25%, 
+            rgba(255, 255, 255, 0.3) 50%, 
+            transparent 75%);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .progress-text {
+        text-align: center;
+        margin: 15px 0;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 16px;
+        text-shadow: 0 0 10px rgba(106, 17, 203, 0.5);
+    }
+
+    .status-log {
+        background: rgba(10, 10, 30, 0.7);
+        border-radius: 12px;
+        padding: 20px;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid rgba(106, 17, 203, 0.3);
+        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+        margin-bottom: 20px;
+    }
+
+    .log-entry {
+        padding: 10px 15px;
+        border-bottom: 1px solid rgba(106, 17, 203, 0.1);
+        color: #e0e0ff;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s ease;
+    }
+
+    .log-entry:hover {
+        background: rgba(106, 17, 203, 0.05);
+        border-radius: 6px;
+    }
+
+    .log-entry:last-child {
+        border-bottom: none;
+    }
+
+    .log-entry i {
+        color: #6a11cb;
+    }
+
+    /* 切换标签样式 */
+    .tab-switcher {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(106, 17, 203, 0.3);
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .tab-btn:hover {
+        border-color: #6a11cb;
+        background: rgba(106, 17, 203, 0.1);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        border-color: #6a11cb;
+        box-shadow: 0 0 20px rgba(106, 17, 203, 0.3);
+    }
+
+    /* 移动端优化 */
+    @media (max-width: 480px) {
+        body {
+            padding: 12px 10px;
+        }
+
+        .neon-card {
+            padding: 14px 12px;
+            max-width: 380px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+        }
+
+        .neon-title {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .neon-input {
+            padding: 12px;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .neon-button {
+            padding: 12px;
+            font-size: 15px;
+        }
+
+        .neon-nav-buttons {
+            gap: 6px;
+            margin: 10px 0;
+        }
+
+        .account-details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .operation-options {
+            grid-template-columns: 1fr;
+        }
+
+        .tab-switcher {
+            flex-direction: column;
+        }
+
+        .status-log {
+            max-height: 250px;
+        }
+    }
+</style>
+</head>
+<body>
+
+<!-- 背景元素 -->
+<div class="grid-bg"></div>
+<div class="neon-glow"></div>
+<div class="particles" id="particles"></div>
+
+<!-- 版本标签 -->
+<div class="version-badge">V3.0</div>
+
+<!-- 语言选择器 -->
+<div class="language-selector">
+    <select id="languageSelect" class="language-dropdown" onchange="changeLanguage(this.value)">
+        <option value="zh-CN">中文简体</option>
+        <option value="zh-TW">中文繁體</option>
+        <option value="en">English</option>
+    </select>
+</div>
+
+<!-- 主卡片容器 -->
+<div class="neon-card">
+    <h1 class="neon-title" id="pageTitle">季伯常工具平台 V3.0</h1>
+
+    <!-- 功能标签切换 -->
+    <div class="tab-switcher">
+        <button class="tab-btn active" onclick="switchTab('main')">🏠 主功能</button>
+        <button class="tab-btn" onclick="switchTab('clone')">🔧 CPM克隆</button>
+        <button class="tab-btn" onclick="switchTab('admin')">⚙️ 管理面板</button>
+    </div>
+
+    <!-- 主功能标签 -->
+    <div id="main-tab" class="tab-content active">
+        <!-- TG频道按钮 -->
+        <a href="https://t.me/cpmjbctool" class="tg-channel-btn" target="_blank">
+            <i class="fab fa-telegram"></i>
+            加入老季的小黑屋
+        </a>
+
+        <!-- 导航按钮 -->
+        <div class="neon-nav-buttons" id="navButtons">
+            <button class="neon-button secondary" onclick="handleReturnHome()" id="btnHome">🏠 首页</button>
+            <button class="neon-button secondary" onclick="handleSwitchAccount()" id="btnSwitchAccount">🔄 切换账号</button>
+            <button class="neon-button secondary" onclick="handleSwitchKey()" id="btnSwitchKey">🔑 切换秘钥</button>
+        </div>
+
+        <div id="statusMessage" class="neon-status">请先输入秘钥验证</div>
+
+        <!-- 管理员选择界面 -->
+        <div id="adminChoice" style="display: none;">
+            <div class="neon-hint" id="adminChoiceHint">请选择您要进入的模式</div>
+            <button class="neon-button" onclick="enterAdminPanel()" id="btnEnterAdmin">进入管理员面板</button>
+            <button class="neon-button secondary" onclick="enterUserPanel()" id="btnEnterUser">进入用户功能</button>
+        </div>
+
+        <!-- 秘钥验证部分 -->
+        <div id="keyForm">
+            <div class="neon-hint" id="keyHint">秘钥请快手搜索cpm季伯常获取，或闲鱼购买</div>
+            <input type="text" id="accessKey" class="neon-input" placeholder="输入访问秘钥" maxlength="15">
+            <div id="bindInfo" class="neon-bind-info" style="display: none;"></div>
+            <button class="neon-button" onclick="handleCheckKey()" id="btnCheckKey">验证秘钥</button>
+        </div>
+
+        <!-- 登录部分 -->
+        <div id="loginForm" style="display: none;">
+            <div id="expiryDisplay" class="neon-expiry"></div>
+            <input type="email" id="email" class="neon-input" placeholder="输入您的邮箱">
+            <input type="password" id="password" class="neon-input" placeholder="输入您的密码">
+            <button class="neon-button" onclick="handleLogin()" id="btnLogin">登录</button>
+        </div>
+
+        <!-- 功能菜单 -->
+        <div id="menuButtons" style="display: none;">
+            <button class="neon-button secondary" onclick="switchToAdminPanel()" id="btnToAdminPanel">🔑 切换到管理员面板</button>
+            <button class="neon-button" onclick="handleKingRank()" id="btnKingRank">一键修改为国王等级</button>
+            <button class="neon-button secondary" id="btnChangeEmail" onclick="handleChangeEmail()">修改邮箱</button>
+            <button class="neon-button secondary" id="btnChangePassword" onclick="handleChangePassword()">修改密码</button>
+            <button class="neon-button secondary" onclick="switchTab('clone')">🔧 切换到CPM克隆</button>
+        </div>
+    </div>
+
+    <!-- CPM克隆工具标签 -->
+    <div id="clone-tab" class="tab-content">
+        <div class="clone-card" id="clone-tab-content">
+            <h2 class="neon-title"><i class="fas fa-clone"></i> CPMCY克隆工具</h2>
+            
+            <!-- 账号信息展示区 -->
+            <div class="account-details-grid hidden" id="account-info-section-clone">
+                <div class="info-box">
+                    <span class="info-label">账号昵称:</span>
+                    <span class="info-value glow-text" id="account-name">--</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">游戏金币:</span>
+                    <span class="info-value glow-text" id="account-money">--</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">车辆数量:</span>
+                    <span class="info-value glow-text" id="account-cars">--</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Local ID:</span>
+                    <span class="info-value glow-text" id="account-localid">--</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">账号状态:</span>
+                    <span class="info-value status-badge glow-text" id="account-status">未登录</span>
+                </div>
+            </div>
+            
+            <button id="logout-btn-clone" class="neon-button secondary" style="display: none;">
+                <i class="fas fa-sign-out-alt"></i> 退出登录
+            </button>
+
+            <!-- 登录部分 -->
+            <div id="login-section-clone">
+                <h3><i class="fas fa-sign-in-alt"></i> 第一步：源账号登录</h3>
+                <p class="neon-hint">请登录要被克隆的源账号（你的主账号）</p>
+                <div class="form-group">
+                    <input type="email" id="source-email" class="neon-input" placeholder="输入CPM账号邮箱" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="source-password" class="neon-input" placeholder="输入CPM账号密码" required>
+                </div>
+                <button id="login-btn-clone" class="neon-button success">
+                    <i class="fas fa-key"></i> 登录并验证账号
+                </button>
+                <div id="login-status" class="neon-status" style="display: none;"></div>
+            </div>
+
+            <!-- 克隆部分 -->
+            <div id="clone-section-clone" class="hidden">
+                <h3><i class="fas fa-clone"></i> 第二步：选择操作类型</h3>
+                
+                <!-- 操作类型选择 -->
+                <div class="operation-options">
+                    <div class="option-item">
+                        <input type="radio" id="op-type1" name="operation-type" value="modify-id" checked>
+                        <label for="op-type1">
+                            <strong>选项1：修改当前账号ID</strong><br>
+                            <small>仅修改当前登录账号的Local ID，其他数据不变</small>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="op-type2" name="operation-type" value="clone-to-new">
+                        <label for="op-type2">
+                            <strong>选项2：克隆到新账号</strong><br>
+                            <small>复制当前账号所有数据到另一个账号（覆盖目标账号）</small>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- 自定义Local ID输入框 -->
+                <div class="form-group" id="custom-id-group">
+                    <input type="text" id="custom-localid" class="neon-input" placeholder="输入新的Local ID（字母数字，建议10-20位）" required>
+                </div>
+                
+                <!-- 目标账号凭据部分（只在选项2时显示） -->
+                <div id="target-credentials" class="hidden">
+                    <div class="form-group">
+                        <input type="email" id="target-email" class="neon-input" placeholder="输入目标账号邮箱">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="target-password" class="neon-input" placeholder="输入目标账号密码">
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>警告：</strong> 这将覆盖目标账号的所有数据！请谨慎操作！
+                </div>
+                
+                <div class="time-warning-box">
+                    <i class="fas fa-clock"></i>
+                    <strong>注意：</strong> 克隆过程可能需要2-5分钟，请勿关闭页面！
+                </div>
+                
+                <button id="clone-btn-clone" class="neon-button destructive">
+                    <i class="fas fa-clone"></i> 开始执行
+                </button>
+                <div id="clone-status" class="neon-status" style="display: none;"></div>
+            </div>
+
+            <!-- 状态显示部分 -->
+            <div id="status-section-clone">
+                <h3><i class="fas fa-info-circle"></i> 克隆进度状态</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                    <div class="progress-text" id="progress-text">准备开始...</div>
+                </div>
+                <div class="status-log" id="status-log">
+                    <div class="log-entry"><i class="fas fa-info-circle"></i> 系统已就绪，请先登录源账号</div>
+                </div>
+            </div>
+
+            <!-- 说明部分 -->
+            <div class="note-box">
+                <i class="fas fa-lightbulb"></i>
+                <strong>提示：</strong> 克隆时间取决于车辆数量，通常需要2-5分钟。
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理员面板标签 -->
+    <div id="admin-tab" class="tab-content">
+        <div id="adminPanel" class="neon-admin-panel">
+            <h4 class="neon-admin-title" id="adminTitle">
+                🔑 秘钥管理中心 🔑
+                <span id="adminLevelBadge" class="admin-level-badge"></span>
+            </h4>
+
+            <!-- 管理员功能切换按钮 -->
+            <button class="neon-button secondary" onclick="switchToUserFunctions()" id="btnToUserFunctions">🎮 切换到功能页面</button>
+            <button class="neon-button secondary" onclick="handleReturnToKeyForm()" id="btnReturnToKeyForm">🔙 返回验证秘钥</button>
+
+            <div class="add-key-form">
+                <!-- 秘钥类型选择 -->
+                <div class="key-type-options" id="keyTypeOptions">
+                    <div class="key-type-option" onclick="selectKeyType('test')">
+                        <input type="radio" name="keyType" id="keyTypeTest" value="test">
+                        <div class="key-type-label">
+                            <div class="key-type-title">
+                                测试卡
+                                <span class="key-type-badge test-badge">仅成就</span>
+                            </div>
+                            <div class="key-type-desc" id="testCardInfo">1小时有效期，仅限1个账号，仅支持解锁成就功能</div>
+                        </div>
+                    </div>
+                    
+                    <div class="key-type-option" onclick="selectKeyType('password')">
+                        <input type="radio" name="keyType" id="keyTypePassword" value="password">
+                        <div class="key-type-label">
+                            <div class="key-type-title">
+                                改密卡
+                                <span class="key-type-badge password-badge">仅改密</span>
+                            </div>
+                            <div class="key-type-desc" id="passwordCardInfo">1小时有效期，仅限1个账号，仅支持修改密码功能</div>
+                        </div>
+                    </div>
+                    
+                    <div class="key-type-option" onclick="selectKeyType('full')">
+                        <input type="radio" name="keyType" id="keyTypeFull" value="full" checked>
+                        <div class="key-type-label">
+                            <div class="key-type-title">
+                                全功能卡
+                                <span class="key-type-badge full-badge">全功能</span>
+                            </div>
+                            <div class="key-type-desc" id="fullCardInfo">支持所有功能，可自定义时长和绑定数量</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 全功能卡选项 -->
+                <div id="fullFeatureOptions" class="full-feature-options">
+                    <div style="margin-bottom: 16px;">
+                        <label for="newKeyDuration" style="display: block; margin-bottom: 8px; font-weight: 500; color: white; font-size: 14px;">
+                            ⏰ 设置秘钥时长（单位：小时）
+                            <span style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">请输入秘钥的有效小时数，例如：30天就输入720</span>
+                        </label>
+                        <input type="number" id="newKeyDuration" class="neon-input" placeholder="例如：720小时（30天）" value="24" min="1">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label for="newKeyMaxBind" style="display: block; margin-bottom: 8px; font-weight: 500; color: white; font-size: 14px;">
+                            👥 绑定账号上限
+                            <span style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">最多允许绑定的账号数量，例如：最多绑定5个账号就输入5</span>
+                        </label>
+                        <input type="number" id="newKeyMaxBind" class="neon-input" placeholder="例如：最多绑定3个账号就输入3" value="3" min="1">
+                    </div>
+                </div>
+                
+                <input type="text" id="newKeyRemark" class="neon-input" placeholder="备注 (如: 月卡/测试卡/改密卡)">
+                <button class="neon-button success" onclick="handleAddKey()" id="btnAddKey">➕ 生成新秘钥</button>
+            </div>
+
+            <div class="neon-nav-buttons">
+                <button class="neon-button secondary" onclick="fetchKeys()" id="btnRefresh">🔄 刷新列表</button>
+                <button class="neon-button" onclick="handleCleanupExpiredKeys()" id="btnCleanup">🗑️ 清理过期</button>
+            </div>
+
+            <div class="neon-table-container">
+                <!-- 秘钥列表 -->
+                <div class="key-category" id="tgCategory">
+                    <div class="category-summary">
+                        <span>🤖 秘钥列表</span>
+                        <span class="key-count" id="tgKeyCount">(0)</span>
+                    </div>
+                    <table class="neon-table">
+                        <thead>
+                            <tr>
+                                <th>秘钥</th>
+                                <th>备注</th>
+                                <th>到期时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tgKeysTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 首页推广信息 -->
+<div class="home-promotion" id="homePromotion">
+    <div class="promotion-header">
+        <div class="promotion-title" id="promotionTitle">什么？你还不知道秘钥找谁买？</div>
+        <div class="promotion-subtitle" id="promotionHint">闲鱼搜索：cpm季伯常 或直接点击下方链接</div>
+    </div>
+    <div class="promotion-links">
+        <a href="https://m.tb.cn/h.704soJF?tk=rkUYfJkWvew" class="promotion-link xianyu" target="_blank">
+            <i class="fas fa-shopping-cart"></i>
+            闲鱼购买秘钥
+        </a>
+        <a href="https://v.kuaishou.com/nVgbtpVy" class="promotion-link kuaishou" target="_blank">
+            <i class="fas fa-video"></i>
+            快手联系老季
+        </a>
+    </div>
+</div>
+
+<!-- 日志区域 -->
+<div class="neon-log-container">
+    <div class="neon-log-title" id="logTitle">操作日志</div>
+    <div id="logHistory">
+        <div class="neon-log-item log-info" id="systemLoaded">系统：页面加载完毕。</div>
+    </div>
+</div>
+
+<!-- 账号详情模态框 -->
+<div id="accountModal" class="neon-modal">
+    <div class="neon-modal-content">
+        <h3 class="neon-modal-title" id="modalAccountTitle">账号详情</h3>
+        <div id="accountDetails"></div>
+        <button class="neon-button" onclick="closeAccountModal()" style="margin-top: 16px;" id="btnCloseModal">关闭</button>
+    </div>
+</div>
+
+<script>
+    // 第一个页面的所有JavaScript代码
+    // 基础配置
+    const API_BASE_URL = '/api';
+    const SUPER_ADMIN_KEY = 'woinjbc';
+
+    // 多语言支持
+    const translations = {
+        'zh-CN': {
+            'pageTitle': '季伯常工具平台 V3.0',
+            'promotionTitle': '什么？你还不知道秘钥找谁买？',
+            'promotionHint': '闲鱼搜索：cpm季伯常 或直接点击下方链接',
+            'keyHint': '秘钥请快手搜索cpm季伯常获取，或闲鱼购买',
+            'btnCheckKey': '验证秘钥',
+            'btnLogin': '登录',
+            'btnKingRank': '一键修改为国王等级',
+            'btnChangeEmail': '修改邮箱',
+            'btnChangePassword': '修改密码',
+            'btnToggleAdmin': '切换管理员模式',
+            'btnHome': '🏠 首页',
+            'btnSwitchAccount': '🔄 切换账号',
+            'btnSwitchKey': '🔑 切换秘钥',
+            'adminTitle': '🔑 秘钥管理中心 🔑',
+            'testCardInfo': '1小时有效期，仅限1个账号，仅支持解锁成就功能',
+            'passwordCardInfo': '1小时有效期，仅限1个账号，仅支持修改密码功能',
+            'fullCardInfo': '支持所有功能，可自定义时长和绑定数量',
+            'btnAddKey': '➕ 生成新秘钥',
+            'btnRefresh': '🔄 刷新列表',
+            'btnCleanup': '🗑️ 清理过期',
+            'thKey': '秘钥',
+            'thRemark': '备注',
+            'thExpiry': '到期时间',
+            'thAction': '操作',
+            'logTitle': '操作日志',
+            'systemLoaded': '系统：页面加载完毕。',
+            'modalAccountTitle': '账号详情',
+            'btnCloseModal': '关闭',
+            'testCardBadge': '测试卡',
+            'passwordCardBadge': '改密卡',
+            'testCardStatus': '测试卡用户',
+            'passwordCardStatus': '改密卡用户',
+            'testCardEmailWarning': '测试卡不支持修改邮箱功能，请联系管理员付费使用完整功能！',
+            'testCardPasswordWarning': '测试卡不支持修改密码功能，请联系管理员付费使用完整功能！',
+            'passwordCardKingWarning': '改密卡不支持国王等级功能，请联系管理员付费使用完整功能！',
+            'passwordCardEmailWarning': '改密卡不支持修改邮箱功能，请联系管理员付费使用完整功能！',
+            'superAdmin': '超级管理员',
+            'normalAdmin': '普通管理员',
+            'adminChoiceHint': '请选择您要进入的模式',
+            'btnEnterAdmin': '进入管理员面板',
+            'btnEnterUser': '进入用户功能',
+            'btnToAdminPanel': '🔑 切换到管理员面板',
+            'btnToUserFunctions': '🎮 切换到功能页面',
+            'btnReturnToKeyForm': '🔙 返回验证秘钥'
+        },
+        'zh-TW': {
+            'pageTitle': '季伯常工具平台 V3.0',
+            'promotionTitle': '什麼？你還不知道秘鑰找誰買？',
+            'promotionHint': '閒魚搜索：cpm季伯常 或直接點擊下方連結',
+            'keyHint': '秘鑰請快手搜索cpm季伯常獲取，或閒魚購買',
+            'btnCheckKey': '驗證秘鑰',
+            'btnLogin': '登錄',
+            'btnKingRank': '一鍵修改為國王等級',
+            'btnChangeEmail': '修改郵箱',
+            'btnChangePassword': '修改密碼',
+            'btnToggleAdmin': '切換管理員模式',
+            'btnHome': '🏠 首頁',
+            'btnSwitchAccount': '🔄 切換賬號',
+            'btnSwitchKey': '🔑 切換秘鑰',
+            'adminTitle': '🔑 秘鑰管理中心 🔑',
+            'testCardInfo': '1小時有效期，僅限1個賬號，僅支持解鎖成就功能',
+            'passwordCardInfo': '1小時有效期，僅限1個賬號，僅支持修改密碼功能',
+            'fullCardInfo': '支持所有功能，可自定義時長和綁定數量',
+            'btnAddKey': '➕ 生成新秘鑰',
+            'btnRefresh': '🔄 刷新列表',
+            'btnCleanup': '🗑️ 清理過期',
+            'thKey': '秘鑰',
+            'thRemark': '備註',
+            'thExpiry': '到期時間',
+            'thAction': '操作',
+            'logTitle': '操作日誌',
+            'systemLoaded': '系統：頁面加載完畢。',
+            'modalAccountTitle': '賬號詳情',
+            'btnCloseModal': '關閉',
+            'testCardBadge': '測試卡',
+            'passwordCardBadge': '改密卡',
+            'testCardStatus': '測試卡用戶',
+            'passwordCardStatus': '改密卡用戶',
+            'testCardEmailWarning': '測試卡不支持修改郵箱功能，請聯繫管理員付費使用完整功能！',
+            'testCardPasswordWarning': '測試卡不支持修改密碼功能，請聯繫管理員付費使用完整功能！',
+            'passwordCardKingWarning': '改密卡不支持國王等級功能，請聯繫管理員付費使用完整功能！',
+            'passwordCardEmailWarning': '改密卡不支持修改郵箱功能，請聯繫管理員付資使用完整功能！',
+            'superAdmin': '超級管理員',
+            'normalAdmin': '普通管理員',
+            'adminChoiceHint': '請選擇您要進入的模式',
+            'btnEnterAdmin': '進入管理員面板',
+            'btnEnterUser': '進入用戶功能',
+            'btnToAdminPanel': '🔑 切換到管理員面板',
+            'btnToUserFunctions': '🎮 切換到功能頁面',
+            'btnReturnToKeyForm': '🔙 返回驗證秘鑰'
+        },
+        'en': {
+            'pageTitle': 'Ji Bochang Tool Platform V3.0',
+            'promotionTitle': 'What? You dont know where to buy keys?',
+            'promotionHint': 'Search cpm季伯常 on Xianyu or click below',
+            'keyHint': 'Get key by searching cpm季伯常 on Kwai or buy on Xianyu',
+            'btnCheckKey': 'Verify Key',
+            'btnLogin': 'Login',
+            'btnKingRank': 'Set King Rank',
+            'btnChangeEmail': 'Change Email',
+            'btnChangePassword': 'Change Password',
+            'btnToggleAdmin': 'Toggle Admin Mode',
+            'btnHome': '🏠 Home',
+            'btnSwitchAccount': '🔄 Switch Account',
+            'btnSwitchKey': '🔑 Switch Key',
+            'adminTitle': '🔑 Key Management Center 🔑',
+            'testCardInfo': '1 hour validity, 1 account only, unlock achievement only',
+            'passwordCardInfo': '1 hour validity, 1 account only, password change only',
+            'fullCardInfo': 'All functions, customizable duration and bind count',
+            'btnAddKey': '➕ Generate New Key',
+            'btnRefresh': '🔄 Refresh List',
+            'btnCleanup': '🗑️ Clean Expired',
+            'thKey': 'Key',
+            'thRemark': 'Remark',
+            'thExpiry': 'Expiry Time',
+            'thAction': 'Action',
+            'logTitle': 'Operation Log',
+            'systemLoaded': 'System: Page loaded successfully.',
+            'modalAccountTitle': 'Account Details',
+            'btnCloseModal': 'Close',
+            'testCardBadge': 'Test Card',
+            'passwordCardBadge': 'Password Card',
+            'testCardStatus': 'Test Card User',
+            'passwordCardStatus': 'Password Card User',
+            'testCardEmailWarning': 'Test card does not support email change. Please contact admin for paid full features!',
+            'testCardPasswordWarning': 'Test card does not support password change. Please contact admin for paid full features!',
+            'passwordCardKingWarning': 'Password card does not support king rank. Please contact admin for paid full features!',
+            'passwordCardEmailWarning': 'Password card does not support email change. Please contact admin for paid full features!',
+            'superAdmin': 'Super Admin',
+            'normalAdmin': 'Normal Admin',
+            'adminChoiceHint': 'Please select the mode you want to enter',
+            'btnEnterAdmin': 'Enter Admin Panel',
+            'btnEnterUser': 'Enter User Functions',
+            'btnToAdminPanel': '🔑 Switch to Admin Panel',
+            'btnToUserFunctions': '🎮 Switch to Functions',
+            'btnReturnToKeyForm': '🔙 Return to Key Verification'
+        }
+    };
+
+    // 当前语言
+    let currentLanguage = 'zh-CN';
+
+    // 状态变量
+    let currentKey = null;
+    let currentToken = null;
+    let currentExpiryTime = null;
+    let currentUser = null;
+    let isAdminMode = false;
+    let isSuperAdmin = false;
+    let currentBindInfo = null;
+    let isTestCard = false;
+    let isPasswordCard = false;
+
+    // 标签切换功能
+    function switchTab(tabName) {
+        // 隐藏所有标签内容
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // 更新标签按钮状态
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // 显示选中的标签
+        document.getElementById(tabName + '-tab').classList.add('active');
+        event.target.classList.add('active');
+        
+        // 记录当前标签
+        localStorage.setItem('currentTab', tabName);
+    }
+
+    // 页面加载时恢复标签状态
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTab = localStorage.getItem('currentTab');
+        if (savedTab) {
+            switchTab(savedTab);
+        }
+    });
+
+    // =================================================================
+    // 多语言功能
+    // =================================================================
+
+    function changeLanguage(lang) {
+        currentLanguage = lang;
+        applyTranslations();
+        logAction("语言切换", `切换到 ${getLanguageName(lang)}`, 'info');
+    }
+
+    function getLanguageName(code) {
+        const names = {
+            'zh-CN': '中文简体',
+            'zh-TW': '中文繁體',
+            'en': 'English'
+        };
+        return names[code] || code;
+    }
+
+    function applyTranslations() {
+        const langData = translations[currentLanguage];
+        
+        Object.keys(langData).forEach(key => {
+            const element = document.getElementById(key);
+            if (element && !(key === 'systemLoaded' && element.parentElement.id === 'logHistory')) {
+                element.textContent = langData[key];
+            }
+        });
+
+        // 更新输入框placeholder
+        document.getElementById('accessKey').placeholder = currentLanguage === 'zh-CN' ? '输入访问秘钥' : 
+                                                         currentLanguage === 'zh-TW' ? '輸入訪問秘鑰' : 'Enter access key';
+        
+        document.getElementById('email').placeholder = currentLanguage === 'zh-CN' ? '输入您的邮箱' : 
+                                                     currentLanguage === 'zh-TW' ? '輸入您的郵箱' : 'Enter your email';
+        
+        document.getElementById('password').placeholder = currentLanguage === 'zh-CN' ? '输入您的密码' : 
+                                                        currentLanguage === 'zh-TW' ? '輸入您的密碼' : 'Enter your password';
+        
+        document.getElementById('newKeyDuration').placeholder = currentLanguage === 'zh-CN' ? '例如：720小时（30天）' : 
+                                                              currentLanguage === 'zh-TW' ? '例如：720小時（30天）' : 'e.g.: 720 hours (30 days)';
+        
+        document.getElementById('newKeyMaxBind').placeholder = currentLanguage === 'zh-CN' ? '例如：最多绑定3个账号就输入3' : 
+                                                             currentLanguage === 'zh-TW' ? '例如：最多綁定3個賬號就輸入3' : 'e.g.: Enter 3 for max 3 accounts';
+        
+        document.getElementById('newKeyRemark').placeholder = currentLanguage === 'zh-CN' ? '备注 (如: 月卡/测试卡/改密卡)' : 
+                                                            currentLanguage === 'zh-TW' ? '備註 (如: 月卡/測試卡/改密卡)' : 'Remark (e.g.: Monthly/Test/Password)';
+    }
+
+    // =================================================================
+    // 管理员权限管理
+    // =================================================================
+
+    function updateAdminUI() {
+        const adminLevelBadge = document.getElementById('adminLevelBadge');
+        const keyTypeOptions = document.getElementById('keyTypeOptions');
+        
+        if (isSuperAdmin) {
+            adminLevelBadge.textContent = translations[currentLanguage].superAdmin;
+            // 超级管理员显示所有选项
+            document.querySelectorAll('.key-type-option').forEach(option => {
+                option.style.display = 'flex';
+            });
+        } else {
+            adminLevelBadge.textContent = translations[currentLanguage].normalAdmin;
+            // 普通管理员只能看到测试卡和改密卡
+            document.getElementById('keyTypeTest').parentElement.style.display = 'flex';
+            document.getElementById('keyTypePassword').parentElement.style.display = 'flex';
+            document.getElementById('keyTypeFull').parentElement.style.display = 'none';
+            // 默认选择测试卡
+            selectKeyType('test');
+        }
+    }
+
+    // =================================================================
+    // 秘钥类型选择功能
+    // =================================================================
+
+    function selectKeyType(type) {
+        // 更新选项样式
+        document.querySelectorAll('.key-type-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        const selectedOption = document.querySelector(`.key-type-option input[value="${type}"]`).parentElement;
+        selectedOption.classList.add('selected');
+        
+        // 更新单选按钮状态
+        document.getElementById(`keyType${type.charAt(0).toUpperCase() + type.slice(1)}`).checked = true;
+        
+        // 显示/隐藏全功能选项
+        const fullOptions = document.getElementById('fullFeatureOptions');
+        if (type === 'full') {
+            fullOptions.style.display = 'block';
+        } else {
+            fullOptions.style.display = 'none';
+        }
+        
+        // 如果是测试卡或改密卡，固定参数
+        if (type === 'test' || type === 'password') {
+            document.getElementById('newKeyDuration').value = 1;
+            document.getElementById('newKeyMaxBind').value = 1;
+        }
+    }
+
+    function updateCardStatus(isTest, isPassword) {
+        isTestCard = isTest;
+        isPasswordCard = isPassword;
+        const statusEl = document.getElementById('statusMessage');
+        
+        if (isTest) {
+            statusEl.className = 'neon-status test-card';
+            document.getElementById('btnChangeEmail').disabled = true;
+            document.getElementById('btnChangePassword').disabled = true;
+            document.getElementById('btnChangeEmail').title = translations[currentLanguage].testCardEmailWarning;
+            document.getElementById('btnChangePassword').title = translations[currentLanguage].testCardPasswordWarning;
+        } else if (isPassword) {
+            statusEl.className = 'neon-status password-card';
+            document.getElementById('btnKingRank').disabled = true;
+            document.getElementById('btnChangeEmail').disabled = true;
+            document.getElementById('btnKingRank').title = translations[currentLanguage].passwordCardKingWarning;
+            document.getElementById('btnChangeEmail').title = translations[currentLanguage].passwordCardEmailWarning;
+        } else {
+            statusEl.className = 'neon-status success';
+            document.getElementById('btnKingRank').disabled = false;
+            document.getElementById('btnChangeEmail').disabled = false;
+            document.getElementById('btnChangePassword').disabled = false;
+            document.getElementById('btnKingRank').title = '';
+            document.getElementById('btnChangeEmail').title = '';
+            document.getElementById('btnChangePassword').title = '';
+        }
+    }
+
+    // =================================================================
+    // 辅助函数
+    // =================================================================
+
+    function logAction(action, message, type) {
+        const logHistory = document.getElementById('logHistory');
+        const now = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+        
+        const typeClass = `log-${type}`;
+        const logItem = document.createElement('div');
+        logItem.className = `neon-log-item ${typeClass}`;
+        
+        let logContent = `${now} [${action}] `;
+        if (isAdminMode) {
+             logContent += `(${isSuperAdmin ? '超级管理员' : '管理员'}): `;
+        } else if (currentUser) {
+            logContent += `(${currentUser}): `;
+        } else {
+            logContent += `(游客): `;
+        }
+        logContent += message;
+
+        logItem.textContent = logContent;
+        
+        logHistory.prepend(logItem);
+
+        while (logHistory.children.length > 15) {
+            logHistory.removeChild(logHistory.lastChild);
+        }
+    }
+
+    function updateStatus(message, isError = false) {
+        const statusEl = document.getElementById('statusMessage');
+        statusEl.textContent = message;
+        
+        if (isTestCard) {
+            statusEl.className = 'neon-status test-card';
+        } else if (isPasswordCard) {
+            statusEl.className = 'neon-status password-card';
+        } else if (isAdminMode) {
+            statusEl.className = isSuperAdmin ? 'neon-status super-admin' : 'neon-status admin';
+        } else {
+            statusEl.className = 'neon-status ' + (isError ? 'error' : 'success');
+        }
+    }
+
+    function updateBindInfo(bindCount, maxBind, remainingBinds) {
+        const bindInfoEl = document.getElementById('bindInfo');
+        if (bindCount !== undefined && maxBind !== undefined && remainingBinds !== undefined) {
+            const bindText = currentLanguage === 'zh-CN' ? `当前绑定: ${bindCount}/${maxBind} | 剩余: ${remainingBinds}` :
+                           currentLanguage === 'zh-TW' ? `當前綁定: ${bindCount}/${maxBind} | 剩餘: ${remainingBinds}` :
+                           `Current: ${bindCount}/${maxBind} | Remaining: ${remainingBinds}`;
+            bindInfoEl.textContent = bindText;
+            bindInfoEl.style.display = 'block';
+            
+            if (remainingBinds <= 2) {
+                bindInfoEl.style.backgroundColor = 'rgba(255, 59, 48, 0.3)';
+                bindInfoEl.style.borderColor = 'rgba(255, 59, 48, 0.5)';
+                bindInfoEl.style.color = '#FFB6C1';
+            } else {
+                bindInfoEl.style.backgroundColor = 'rgba(255, 149, 0, 0.3)';
+                bindInfoEl.style.borderColor = 'rgba(255, 149, 0, 0.5)';
+                bindInfoEl.style.color = 'white';
+            }
+        } else {
+            bindInfoEl.style.display = 'none';
+        }
+    }
+
+    function switchSection(showId, hideIds) {
+        // 显示指定的部分
+        document.getElementById(showId).style.display = 'block';
+        
+        // 隐藏其他部分
+        hideIds.forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+        
+        // 显示导航按钮
+        document.getElementById('navButtons').style.display = 'flex';
+        
+        // 控制首页推广信息的显示：只在keyForm页面显示
+        const homePromotion = document.getElementById('homePromotion');
+        if (showId === 'keyForm') {
+            homePromotion.style.display = 'block';
+        } else {
+            homePromotion.style.display = 'none';
+        }
+    }
+
+    function checkLogin() {
+        if (!currentToken || !currentKey) {
+            updateStatus(currentLanguage === 'zh-CN' ? "请先登录！" : 
+                        currentLanguage === 'zh-TW' ? "請先登錄！" : "Please login first!", true);
+            handleLogout(true); 
+            return false;
+        }
+        return true;
+    }
+    
+    function saveAuthToStorage(key, token, expiry, user) {
+        localStorage.setItem('accessKey', key);
+        localStorage.setItem('idToken', token);
+        localStorage.setItem('expiryTime', expiry);
+        localStorage.setItem('currentUser', user);
+        localStorage.setItem('currentLanguage', currentLanguage);
+    }
+
+    function loadAuthFromStorage() {
+        currentKey = localStorage.getItem('accessKey');
+        currentToken = localStorage.getItem('idToken');
+        currentExpiryTime = localStorage.getItem('expiryTime');
+        currentUser = localStorage.getItem('currentUser');
+        const savedLang = localStorage.getItem('currentLanguage');
+        if (savedLang) {
+            currentLanguage = savedLang;
+            document.getElementById('languageSelect').value = currentLanguage;
+            applyTranslations();
+        }
+        return currentKey && currentToken;
+    }
+
+    function updateExpiryDisplay(expiryTime, durationHours, specialTag = null, clear = false) {
+        const displayEl = document.getElementById('expiryDisplay');
+        if (clear || !expiryTime) {
+            displayEl.textContent = '';
+            displayEl.className = 'neon-expiry';
+            return;
+        }
+        
+        let vipLevel = "";
+        
+        if (isTestCard) {
+            vipLevel = translations[currentLanguage].testCardStatus;
+        } else if (isPasswordCard) {
+            vipLevel = translations[currentLanguage].passwordCardStatus;
+        } else if (specialTag === 'DIAMOND_EXCLUSIVE') {
+            vipLevel = "至尊VIP";
+        } else if (durationHours !== null) {
+            const hours = durationHours;
+            
+            if (hours >= 365 * 24 * 5) {
+                vipLevel = "钻石VIP";
+            } else if (hours >= 30 * 24) { 
+                vipLevel = "铂金VIP";
+            } else if (hours >= 7 * 24) { 
+                vipLevel = "黄金VIP";
+            } else if (hours >= 24) {
+                vipLevel = "白银VIP";
+            } else {
+                vipLevel = "青铜VIP";
+            }
+        } else {
+            vipLevel = currentLanguage === 'zh-CN' ? "尊贵的用户" : 
+                      currentLanguage === 'zh-TW' ? "尊貴的用戶" : "Valued User";
+        }
+
+        const welcomeText = currentLanguage === 'zh-CN' ? `欢迎登录，<strong>${vipLevel}</strong>用户！` :
+                          currentLanguage === 'zh-TW' ? `歡迎登錄，<strong>${vipLevel}</strong>用戶！` :
+                          `Welcome, <strong>${vipLevel}</strong>!`;
+
+        // 创建闪烁的到期时间元素
+        let expiryHtml = welcomeText + `<br>`;
+        
+        if (expiryTime) {
+            // 添加闪烁效果
+            expiryHtml += `<div class="blinking-expiry">秘钥将于 ${expiryTime} 到期</div>`;
+        }
+
+        displayEl.innerHTML = expiryHtml;
+    }
+
+    // =================================================================
+    // 管理员选择功能
+    // =================================================================
+
+    function enterAdminPanel() {
+        document.getElementById('adminChoice').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        updateStatus(currentLanguage === 'zh-CN' ? "已进入管理员面板" : 
+                   currentLanguage === 'zh-TW' ? "已進入管理員面板" : "Entered admin panel", false);
+        updateAdminUI();
+        fetchKeys();
+        logAction("管理员模式", "进入秘钥管理中心", 'info');
+    }
+
+    function enterUserPanel() {
+        document.getElementById('adminChoice').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+        updateStatus(currentLanguage === 'zh-CN' ? "请登录您的游戏账号使用功能" : 
+                   currentLanguage === 'zh-TW' ? "請登錄您的遊戲賬號使用功能" : "Please login with your game account to use functions", false);
+        logAction("管理员模式", "选择进入用户功能", 'info');
+    }
+
+    // =================================================================
+    // 页面切换功能
+    // =================================================================
+
+    function switchToUserFunctions() {
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+        updateStatus(currentLanguage === 'zh-CN' ? "请登录您的游戏账号使用功能" : 
+                   currentLanguage === 'zh-TW' ? "請登錄您的遊戲賬號使用功能" : "Please login with your game account to use functions", false);
+        logAction("页面切换", "从管理员面板切换到功能页面", 'info');
+    }
+
+    function switchToAdminPanel() {
+        document.getElementById('menuButtons').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        updateStatus(currentLanguage === 'zh-CN' ? "已进入管理员面板" : 
+                   currentLanguage === 'zh-TW' ? "已進入管理員面板" : "Entered admin panel", false);
+        updateAdminUI();
+        fetchKeys();
+        logAction("页面切换", "从功能页面切换到管理员面板", 'info');
+    }
+
+    function handleReturnToKeyForm() {
+        handleLogout(true);
+        switchSection('keyForm', ['loginForm', 'menuButtons', 'adminPanel', 'adminChoice']);
+        updateStatus(currentLanguage === 'zh-CN' ? "请输入新的秘钥" : 
+                   currentLanguage === 'zh-TW' ? "請輸入新的秘鑰" : "Please enter new key", false);
+        logAction("页面切换", "返回秘钥验证页面", 'info');
+    }
+
+    // =================================================================
+    // 核心接口调用
+    // =================================================================
+
+    async function handleCheckKey(key = null) {
+        key = key || document.getElementById('accessKey').value.trim();
+        if (!key) {
+            return updateStatus(currentLanguage === 'zh-CN' ? "请输入秘钥！" : 
+                              currentLanguage === 'zh-TW' ? "請輸入秘鑰！" : "Please enter key!", true);
+        }
+        
+        updateStatus(currentLanguage === 'zh-CN' ? "正在验证秘钥，请稍候..." : 
+                   currentLanguage === 'zh-TW' ? "正在驗證秘鑰，請稍候..." : "Verifying key, please wait...");
+        
+        try {
+            const email = document.getElementById('email') ? document.getElementById('email').value.trim() : null;
+            
+            const response = await fetch(`${API_BASE_URL}/check-key`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ key, email })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                logAction("秘钥验证", data.message || "秘钥验证失败", 'error');
+                throw new Error(data.message || "秘钥验证失败");
+            }
+            
+            currentKey = key;
+            currentExpiryTime = data.expiryTime;
+            isAdminMode = data.isAdmin;
+            isSuperAdmin = data.isSuperAdmin || false;
+            isTestCard = data.isTestCard || false;
+            isPasswordCard = data.isPasswordCard || false;
+            
+            // 如果是管理员且需要选择模式
+            if (data.isAdmin && data.needsChoice) {
+                updateCardStatus(isTestCard, isPasswordCard);
+                updateBindInfo(data.bindCount, data.maxBind, data.remainingBinds);
+                updateStatus(data.message, false);
+                document.getElementById('adminChoice').style.display = 'block';
+                document.getElementById('keyForm').style.display = 'none';
+                // 隐藏导航按钮在选择界面
+                document.getElementById('navButtons').style.display = 'none';
+                // 隐藏广告
+                document.getElementById('homePromotion').style.display = 'none';
+                logAction("管理员验证", "管理员模式选择界面", 'info');
+                return;
+            }
+            
+            updateCardStatus(isTestCard, isPasswordCard);
+            updateBindInfo(data.bindCount, data.maxBind, data.remainingBinds);
+            currentBindInfo = { 
+                bindCount: data.bindCount, 
+                maxBind: data.maxBind, 
+                remainingBinds: data.remainingBinds,
+                isEmailBound: data.isEmailBound
+            };
+            
+            if (isAdminMode) {
+                // 管理员直接进入管理员面板
+                updateStatus(data.message, false);
+                switchSection('adminPanel', ['keyForm', 'loginForm', 'menuButtons', 'adminChoice']);
+                updateAdminUI();
+                fetchKeys();
+                logAction("管理员秘钥", `${isSuperAdmin ? '超级管理员' : '管理员'}模式启用`, 'info');
+            } else {
+                updateExpiryDisplay(
+                    currentExpiryTime, 
+                    data.durationHours || null, 
+                    data.cardType || null
+                );
+                
+                if (data.isEmailBound && email) {
+                    updateStatus(currentLanguage === 'zh-CN' ? `邮箱 ${email} 已绑定此秘钥，可以直接登录！` : 
+                               currentLanguage === 'zh-TW' ? `郵箱 ${email} 已綁定此秘鑰，可以直接登錄！` : 
+                               `Email ${email} is bound to this key, you can login directly!`, false);
+                } else if (data.remainingBinds <= 0) {
+                    updateStatus(currentLanguage === 'zh-CN' ? `秘钥绑定已满！但已绑定的账号仍可登录。` : 
+                               currentLanguage === 'zh-TW' ? `秘鑰綁定已滿！但已綁定的賬號仍可登錄。` : 
+                               `Key binding is full! But bound accounts can still login.`, true);
+                } else {
+                    updateStatus(data.message, false);
+                }
+                
+                switchSection('loginForm', ['keyForm', 'menuButtons', 'adminPanel', 'adminChoice']);
+                logAction("秘钥验证", data.message, 'success');
+            }
+
+        } catch (error) {
+            updateStatus(`${currentLanguage === 'zh-CN' ? '验证失败：' : 
+                        currentLanguage === 'zh-TW' ? '驗證失敗：' : 'Verification failed: '}${error.message}`, true);
+            updateBindInfo();
+            updateCardStatus(false, false);
+        }
+    }
+
+    async function fetchKeys() {
+        if (!isAdminMode) return;
+        logAction("秘钥管理", "正在获取分类秘钥列表...", 'info');
+        updateStatus(currentLanguage === 'zh-CN' ? "正在获取分类秘钥列表..." : 
+                   currentLanguage === 'zh-TW' ? "正在獲取分類秘鑰列表..." : "Fetching categorized key list...", false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/keys?key=${currentKey}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                logAction("秘钥管理", data.message || "获取列表失败", 'error');
+                updateStatus(`${currentLanguage === 'zh-CN' ? '获取秘钥列表失败：' : 
+                            currentLanguage === 'zh-TW' ? '獲取秘鑰列表失敗：' : 'Failed to get key list: '}${data.message || '未知错误'}`, true);
+                return;
+            }
+
+            renderKeysTable(data.keys);
+            updateStatus(currentLanguage === 'zh-CN' ? `成功获取分类秘钥信息` : 
+                       currentLanguage === 'zh-TW' ? `成功獲取分類秘鑰信息` : 
+                       `Successfully got categorized key info`, false);
+            logAction("秘钥管理", "成功获取分类秘钥列表", 'success');
+
+        } catch (error) {
+            updateStatus(`${currentLanguage === 'zh-CN' ? '获取列表失败：' : 
+                        currentLanguage === 'zh-TW' ? '獲取列表失敗：' : 'Failed to get list: '}${error.message}`, true);
+            logAction("秘钥管理", `获取列表失败：${error.message}`, 'error');
+        }
+    }
+    
+    function renderKeysTable(categorizedKeys) {
+        // 渲染TG秘钥
+        const tgTbody = document.getElementById('tgKeysTableBody');
+        tgTbody.innerHTML = '';
+        const tgKeys = categorizedKeys.telegram || [];
+        
+        tgKeys.forEach(keyData => {
+            renderKeyRow(tgTbody, keyData, 'tg');
+        });
+        document.getElementById('tgKeyCount').textContent = `(${tgKeys.length})`;
+    }
+
+    // 渲染单行秘钥
+    function renderKeyRow(tbody, keyData, type) {
+        const isActivated = keyData.isActivated;
+        let expiryTimeStr;
+        
+        if (isActivated && keyData.expiryTime) {
+            try {
+                expiryTimeStr = new Date(keyData.expiryTime).toLocaleString('zh-CN', { 
+                    hour12: false, 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            } catch (e) {
+                expiryTimeStr = currentLanguage === 'zh-CN' ? '时间格式错误' : 'Date format error';
+            }
+        } else {
+            expiryTimeStr = currentLanguage === 'zh-CN' ? '未激活' : 'Not activated';
+        }
+            
+        const expiryClass = (isActivated && keyData.expiryTime && (new Date(keyData.expiryTime).getTime() - Date.now() < 24 * 3600 * 1000)) ? 'style="color: #FFB6C1; font-weight: bold;"' : '';
+
+        const boundEmails = keyData.boundEmails || [];
+        const bindCount = boundEmails.length;
+        const maxBind = keyData.maxBind || 3;
+        const bindInfo = ` (${bindCount}/${maxBind})`;
+
+        let cardBadge = '';
+        if (keyData.isTestCard) {
+            cardBadge = `<span class="test-card-badge">${translations[currentLanguage].testCardBadge}</span>`;
+        } else if (keyData.isPasswordCard) {
+            cardBadge = `<span class="password-card-badge">${translations[currentLanguage].passwordCardBadge}</span>`;
+        }
+        
+        let addedByInfo = '';
+        if (type === 'tg' && keyData.telegramUser) {
+            const tgUser = keyData.telegramUser;
+            addedByInfo = `<br><small>TG用户: ${tgUser.username || tgUser.firstName || '未知'}</small>`;
+        } else if (keyData.addedByName) {
+            addedByInfo = `<br><small>${keyData.addedByName}</small>`;
+        }
+
+        const row = tbody.insertRow();
+        
+        if (type === 'tg') {
+            // TG秘钥显示TG用户信息和快手暗号
+            const kuaishouCode = keyData.applicationInfo ? keyData.applicationInfo.kuaishouCode : '未记录';
+            row.innerHTML = `
+                <td>${keyData.key}${cardBadge}${addedByInfo}</td>
+                <td>${keyData.telegramUser ? (keyData.telegramUser.username || keyData.telegramUser.firstName || '未知') : '未知'}</td>
+                <td>${kuaishouCode}</td>
+                <td ${expiryClass}>${expiryTimeStr.replace(/\//g, '-')}</td>
+                <td>
+                    <div class="neon-action-group">
+                        <button class="neon-action-btn copy" onclick="copyKey('${keyData.key}')">复制</button>
+                        <button class="neon-action-btn view" onclick="viewAccountDetails('${keyData.key}')">详情</button>
+                        <button class="neon-action-btn delete" onclick="handleDeleteKey('${keyData.key}')">删除</button>
+                    </div>
+                </td>
+            `;
+        } else {
+            // 其他秘钥显示备注信息
+            row.innerHTML = `
+                <td>${keyData.key}${cardBadge}${addedByInfo}</td>
+                <td>${(keyData.remark || '无') + bindInfo}</td>
+                <td ${expiryClass}>${expiryTimeStr.replace(/\//g, '-')}</td>
+                <td>
+                    <div class="neon-action-group">
+                        <button class="neon-action-btn copy" onclick="copyKey('${keyData.key}')">复制</button>
+                        <button class="neon-action-btn view" onclick="viewAccountDetails('${keyData.key}')">详情</button>
+                        <button class="neon-action-btn delete" onclick="handleDeleteKey('${keyData.key}')">删除</button>
+                    </div>
+                </td>
+            `;
+        }
+    }
+
+    function viewAccountDetails(key) {
+        fetch(`${API_BASE_URL}/admin/keys?key=${currentKey}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 修复：从分类的秘钥数据中查找
+                    let keyData = null;
+                    
+                    // 检查所有分类
+                    if (data.keys.telegram) {
+                        keyData = data.keys.telegram.find(k => k.key === key);
+                    }
+                    if (!keyData && data.keys.superAdmin) {
+                        keyData = data.keys.superAdmin.find(k => k.key === key);
+                    }
+                    if (!keyData && data.keys.normalAdmins) {
+                        for (let adminKey in data.keys.normalAdmins) {
+                            keyData = data.keys.normalAdmins[adminKey].keys.find(k => k.key === key);
+                            if (keyData) break;
+                        }
+                    }
+                    
+                    if (keyData) {
+                        showAccountDetails(keyData);
+                    } else {
+                        alert(currentLanguage === 'zh-CN' ? '未找到该秘钥的详细信息！' : 
+                              currentLanguage === 'zh-TW' ? '未找到該秘鑰的詳細信息！' : 'Key details not found!');
+                    }
+                }
+            })
+            .catch(error => {
+                alert(`${currentLanguage === 'zh-CN' ? '获取账号详情失败: ' : 
+                      currentLanguage === 'zh-TW' ? '獲取賬號詳情失敗: ' : 'Failed to get account details: '}${error.message}`);
+            });
+    }
+
+    function showAccountDetails(keyData) {
+        const modal = document.getElementById('accountModal');
+        const detailsEl = document.getElementById('accountDetails');
+        
+        const activationTime = keyData.activationTime ? 
+            new Date(keyData.activationTime).toLocaleString('zh-CN', { hour12: false }) : 
+            (currentLanguage === 'zh-CN' ? '未激活' : 
+             currentLanguage === 'zh-TW' ? '未激活' : 'Not activated');
+        const expiryTime = keyData.expiryTime ? 
+            new Date(keyData.expiryTime).toLocaleString('zh-CN', { hour12: false }) : 
+            (currentLanguage === 'zh-CN' ? '未激活' : 
+             currentLanguage === 'zh-TW' ? '未激活' : 'Not activated');
+        
+        const keyLabel = currentLanguage === 'zh-CN' ? '秘钥:' : 
+                        currentLanguage === 'zh-TW' ? '秘鑰:' : 'Key:';
+        const remarkLabel = currentLanguage === 'zh-CN' ? '备注:' : 
+                           currentLanguage === 'zh-TW' ? '備註:' : 'Remark:';
+        const statusLabel = currentLanguage === 'zh-CN' ? '状态:' : 
+                           currentLanguage === 'zh-TW' ? '狀態:' : 'Status:';
+        const activateTimeLabel = currentLanguage === 'zh-CN' ? '启用时间:' : 
+                                currentLanguage === 'zh-TW' ? '啟用時間:' : 'Activation Time:';
+        const expiryTimeLabel = currentLanguage === 'zh-CN' ? '到期时间:' : 
+                               currentLanguage === 'zh-TW' ? '到期時間:' : 'Expiry Time:';
+        const bindCountLabel = currentLanguage === 'zh-CN' ? '绑定数量:' : 
+                              currentLanguage === 'zh-TW' ? '綁定數量:' : 'Bind Count:';
+        const addedByLabel = currentLanguage === 'zh-CN' ? '添加者:' : 
+                           currentLanguage === 'zh-TW' ? '添加者:' : 'Added By:';
+        const cardTypeLabel = currentLanguage === 'zh-CN' ? '秘钥类型:' : 
+                            currentLanguage === 'zh-TW' ? '秘鑰類型:' : 'Key Type:';
+        const activatedStatus = currentLanguage === 'zh-CN' ? '已激活' : 
+                              currentLanguage === 'zh-TW' ? '已激活' : 'Activated';
+        const notActivatedStatus = currentLanguage === 'zh-CN' ? '未激活' : 
+                                 currentLanguage === 'zh-TW' ? '未激活' : 'Not activated';
+        const boundAccountsLabel = currentLanguage === 'zh-CN' ? '绑定的账号:' : 
+                                  currentLanguage === 'zh-TW' ? '綁定的賬號:' : 'Bound Accounts:';
+        const noAccountsLabel = currentLanguage === 'zh-CN' ? '暂无绑定的账号' : 
+                               currentLanguage === 'zh-TW' ? '暫無綁定的賬號' : 'No bound accounts';
+        
+        let cardType = '';
+        if (keyData.isTestCard) {
+            cardType = translations[currentLanguage].testCardBadge;
+        } else if (keyData.isPasswordCard) {
+            cardType = translations[currentLanguage].passwordCardBadge;
+        } else {
+            cardType = currentLanguage === 'zh-CN' ? '全功能卡' : 
+                      currentLanguage === 'zh-TW' ? '全功能卡' : 'Full Feature Card';
+        }
+        
+        let html = `<div style="margin-bottom: 16px;">
+            <strong>${keyLabel}</strong> ${keyData.key}<br>
+            <strong>${cardTypeLabel}</strong> ${cardType}<br>
+            <strong>${remarkLabel}</strong> ${keyData.remark || (currentLanguage === 'zh-CN' ? '无' : 
+                                                               currentLanguage === 'zh-TW' ? '無' : 'None')}<br>
+            <strong>${statusLabel}</strong> ${keyData.isActivated ? activatedStatus : notActivatedStatus}<br>
+            <strong>${activateTimeLabel}</strong> ${activationTime}<br>
+            <strong>${expiryTimeLabel}</strong> ${expiryTime}<br>
+            <strong>${bindCountLabel}</strong> ${(keyData.boundEmails || []).length}/${keyData.maxBind || 3}<br>
+            <strong>${addedByLabel}</strong> ${keyData.addedByName || (currentLanguage === 'zh-CN' ? '未知' : 
+                                                                     currentLanguage === 'zh-TW' ? '未知' : 'Unknown')}
+        </div>`;
+
+        // 显示TG用户信息
+        if (keyData.telegramUser) {
+            const tgUser = keyData.telegramUser;
+            const tgLabel = currentLanguage === 'zh-CN' ? 'Telegram用户信息:' : 
+                           currentLanguage === 'zh-TW' ? 'Telegram用戶信息:' : 'Telegram User:';
+            const idLabel = currentLanguage === 'zh-CN' ? '用户ID:' : 
+                           currentLanguage === 'zh-TW' ? '用戶ID:' : 'User ID:';
+            const nameLabel = currentLanguage === 'zh-CN' ? '用户名:' : 
+                             currentLanguage === 'zh-TW' ? '用戶名:' : 'Username:';
+            const firstNameLabel = currentLanguage === 'zh-CN' ? '名字:' : 
+                                 currentLanguage === 'zh-TW' ? '名字:' : 'First Name:';
+            
+            html += `<div style="margin: 16px 0; padding: 12px; background: rgba(0, 122, 255, 0.1); border-radius: 8px;">
+                <strong>${tgLabel}</strong><br>
+                <strong>${idLabel}</strong> ${tgUser.id}<br>
+                <strong>${nameLabel}</strong> ${tgUser.username || '无'}<br>
+                <strong>${firstNameLabel}</strong> ${tgUser.firstName || '无'}
+            </div>`;
+        }
+
+        // 显示申请信息
+        if (keyData.applicationInfo) {
+            const appInfo = keyData.applicationInfo;
+            const applyLabel = currentLanguage === 'zh-CN' ? '申请信息:' : 
+                              currentLanguage === 'zh-TW' ? '申請信息:' : 'Application Info:';
+            const applyTimeLabel = currentLanguage === 'zh-CN' ? '申请时间:' : 
+                                 currentLanguage === 'zh-TW' ? '申請時間:' : 'Applied At:';
+            const kuaishouLabel = currentLanguage === 'zh-CN' ? '快手暗号:' : 
+                                 currentLanguage === 'zh-TW' ? '快手暗號:' : 'Kuaishou Code:';
+            
+            html += `<div style="margin: 16px 0; padding: 12px; background: rgba(255, 149, 0, 0.1); border-radius: 8px;">
+                <strong>${applyLabel}</strong><br>
+                <strong>${applyTimeLabel}</strong> ${new Date(appInfo.appliedAt).toLocaleString()}<br>
+                <strong>${kuaishouLabel}</strong> ${appInfo.kuaishouCode || '未提供'}<br>
+                <strong>申请渠道:</strong> ${appInfo.appliedVia || '未知'}
+            </div>`;
+        }
+
+        const boundAccounts = keyData.boundAccounts || [];
+        if (boundAccounts.length > 0) {
+            html += `<div><strong>${boundAccountsLabel}</strong></div>`;
+            boundAccounts.forEach((account, index) => {
+                // 直接显示base64密码，不解码
+                const password = account.password || '';
+                
+                const accountLabel = currentLanguage === 'zh-CN' ? `账号 ${index + 1}:` : 
+                                   currentLanguage === 'zh-TW' ? `賬號 ${index + 1}:` : `Account ${index + 1}:`;
+                const emailLabel = currentLanguage === 'zh-CN' ? '邮箱:' : 
+                                 currentLanguage === 'zh-TW' ? '郵箱:' : 'Email:';
+                const passwordLabel = currentLanguage === 'zh-CN' ? '密码(base64):' : 
+                                    currentLanguage === 'zh-TW' ? '密碼(base64):' : 'Password(base64):';
+                const bindTimeLabel = currentLanguage === 'zh-CN' ? '绑定时间:' : 
+                                    currentLanguage === 'zh-TW' ? '綁定時間:' : 'Bind Time:';
+                const lastLoginLabel = currentLanguage === 'zh-CN' ? '最后登录:' : 
+                                     currentLanguage === 'zh-TW' ? '最後登錄:' : 'Last Login:';
+                
+                html += `
+                <div class="account-detail-item">
+                    <strong>${accountLabel}</strong><br>
+                    <strong>${emailLabel}</strong> ${account.email}<br>
+                    <strong>${passwordLabel}</strong> ${password}<br>
+                    <strong>${bindTimeLabel}</strong> ${new Date(account.bindTime).toLocaleString()}<br>
+                    <strong>${lastLoginLabel}</strong> ${new Date(account.lastLogin).toLocaleString()}
+                </div>`;
+            });
+        } else {
+            html += `<div>${noAccountsLabel}</div>`;
+        }
+
+        detailsEl.innerHTML = html;
+        modal.style.display = 'flex';
+    }
+
+    function closeAccountModal() {
+        document.getElementById('accountModal').style.display = 'none';
+    }
+
+    function copyKey(keyToCopy) {
+        navigator.clipboard.writeText(keyToCopy)
+            .then(() => {
+                updateStatus(`${currentLanguage === 'zh-CN' ? '秘钥 ' : 
+                            currentLanguage === 'zh-TW' ? '秘鑰 ' : 'Key '}${keyToCopy.substring(0, 4)}... ${currentLanguage === 'zh-CN' ? '已复制成功！' : 
+                            currentLanguage === 'zh-TW' ? '已複製成功！' : 'copied successfully!'}`, false);
+                logAction("秘钥复制", `秘钥 ${keyToCopy} 已复制`, 'success');
+            })
+            .catch(err => {
+                updateStatus(currentLanguage === 'zh-CN' ? '秘钥复制失败，请手动复制' : 
+                           currentLanguage === 'zh-TW' ? '秘鑰複製失敗，請手動複製' : 'Key copy failed, please copy manually', true);
+                logAction("秘钥复制", `秘钥复制失败: ${err.message}`, 'error');
+            });
+    }
+
+    async function handleAddKey() {
+        if (!isAdminMode) return;
+
+        const keyType = document.querySelector('input[name="keyType"]:checked').value;
+        const duration = parseInt(document.getElementById('newKeyDuration').value);
+        const maxBind = parseInt(document.getElementById('newKeyMaxBind').value) || 3;
+        const remark = document.getElementById('newKeyRemark').value.trim();
+
+        // 验证输入
+        if (keyType === 'full') {
+            if (!duration || duration <= 0) {
+                return alert(currentLanguage === 'zh-CN' ? "请输入有效的秘钥时长 (小时)" : 
+                           currentLanguage === 'zh-TW' ? "請輸入有效的秘鑰時長 (小時)" : "Please enter valid key duration (hours)");
+            }
+            if (maxBind <= 0) {
+                return alert(currentLanguage === 'zh-CN' ? "请输入有效的最大绑定数量" : 
+                           currentLanguage === 'zh-TW' ? "請輸入有效的最大綁定數量" : "Please enter valid max bind count");
+            }
+        }
+
+        // 普通管理员只能生成测试卡和改密卡
+        if (!isSuperAdmin && keyType === 'full') {
+            return alert(currentLanguage === 'zh-CN' ? '普通管理员只能生成测试卡和改密卡' : 
+                        currentLanguage === 'zh-TW' ? '普通管理員只能生成測試卡和改密卡' : 'Normal admin can only generate test and password cards');
+        }
+        
+        logAction("秘钥管理", `正在生成${getKeyTypeName(keyType)}...`, 'info');
+        updateStatus(currentLanguage === 'zh-CN' ? "正在生成并新增秘钥..." : 
+                   currentLanguage === 'zh-TW' ? "正在生成並新增秘鑰..." : "Generating new key...", false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/keys?key=${currentKey}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    durationHours: keyType === 'full' ? duration : 1, 
+                    maxBind: keyType === 'full' ? maxBind : 1, 
+                    remark: remark,
+                    isTestCard: keyType === 'test',
+                    isPasswordCard: keyType === 'password'
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                logAction("秘钥管理", data.message || "新增秘钥失败", 'error');
+                updateStatus(`${currentLanguage === 'zh-CN' ? '新增秘钥失败：' : 
+                            currentLanguage === 'zh-TW' ? '新增秘鑰失敗：' : 'Failed to add key: '}${data.message || '未知错误'}`, true);
+                return;
+            }
+
+            const keyTypeName = getKeyTypeName(keyType);
+            const successMessage = keyType === 'full' ? 
+                (currentLanguage === 'zh-CN' ? `全功能卡生成成功！\n秘钥: ${data.key}\n时长: ${duration} 小时\n最大绑定: ${maxBind} 个账号\n备注: ${remark || '无'}` :
+                 currentLanguage === 'zh-TW' ? `全功能卡生成成功！\n秘鑰: ${data.key}\n時長: ${duration} 小時\n最大綁定: ${maxBind} 個賬號\n備註: ${remark || '無'}` :
+                 `Full feature card generated successfully!\nKey: ${data.key}\nDuration: ${duration} hours\nMax Bind: ${maxBind} accounts\nRemark: ${remark || 'None'}`) :
+                (currentLanguage === 'zh-CN' ? `${keyTypeName}生成成功！\n秘钥: ${data.key}\n时长: 1 小时\n最大绑定: 1 个账号\n备注: ${remark || keyTypeName}` :
+                 currentLanguage === 'zh-TW' ? `${keyTypeName}生成成功！\n秘鑰: ${data.key}\n時長: 1 小時\n最大綁定: 1 個賬號\n備註: ${remark || keyTypeName}` :
+                 `${keyTypeName} generated successfully!\nKey: ${data.key}\nDuration: 1 hour\nMax Bind: 1 account\nRemark: ${remark || keyTypeName}`);
+            
+            alert(successMessage);
+            
+            logAction("秘钥管理", `成功生成${keyTypeName}: ${data.key}`, 'success');
+            
+            fetchKeys();
+
+        } catch (error) {
+            updateStatus(`${currentLanguage === 'zh-CN' ? '新增秘钥失败：' : 
+                        currentLanguage === 'zh-TW' ? '新增秘鑰失敗：' : 'Failed to add key: '}${error.message}`, true);
+            logAction("秘钥管理", `新增秘钥失败：${error.message}`, 'error');
+        }
+    }
+
+    function getKeyTypeName(type) {
+        if (type === 'test') return '测试卡';
+        if (type === 'password') return '改密卡';
+        return '全功能卡';
+    }
+
+    async function handleCleanupExpiredKeys() {
+        if (!isAdminMode) return;
+        
+        const confirmMessage = currentLanguage === 'zh-CN' ? '确定要清理所有过期秘钥吗？此操作不可逆！' :
+                             currentLanguage === 'zh-TW' ? '確定要清理所有過期秘鑰嗎？此操作不可逆！' :
+                             'Are you sure you want to clean up all expired keys? This operation is irreversible!';
+        
+        if (!confirm(confirmMessage)) return;
+
+        logAction("秘钥管理", "正在清理过期秘钥...", 'info');
+        updateStatus(currentLanguage === 'zh-CN' ? "正在清理过期秘钥..." : 
+                   currentLanguage === 'zh-TW' ? "正在清理過期秘鑰..." : "Cleaning expired keys...", false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/cleanup-expired-keys?key=${currentKey}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                logAction("秘钥管理", data.message || "清理过期秘钥失败", 'error');
+                updateStatus(`${currentLanguage === 'zh-CN' ? '清理失败：' : 
+                            currentLanguage === 'zh-TW' ? '清理失敗：' : 'Cleanup failed: '}${data.message || '未知错误'}`, true);
+                return;
+            }
+
+            logAction("秘钥管理", data.message, 'success');
+            updateStatus(data.message, false);
+            
+            fetchKeys();
+
+        } catch (error) {
+            updateStatus(`${currentLanguage === 'zh-CN' ? '清理失败：' : 
+                        currentLanguage === 'zh-TW' ? '清理失敗：' : 'Cleanup failed: '}${error.message}`, true);
+            logAction("秘钥管理", `清理失败: ${error.message}`, 'error');
+        }
+    }
+    
+    async function handleDeleteKey(keyToDelete) {
+        if (!isAdminMode) return;
+        
+        const confirmMessage = currentLanguage === 'zh-CN' ? `确定要永久删除秘钥：${keyToDelete} 吗？\n此操作不可逆！` :
+                             currentLanguage === 'zh-TW' ? `確定要永久刪除秘鑰：${keyToDelete} 嗎？\n此操作不可逆！` :
+                             `Are you sure you want to permanently delete key: ${keyToDelete}?\nThis operation is irreversible!`;
+        
+        if (!confirm(confirmMessage)) return;
+
+        logAction("秘钥管理", `正在删除秘钥: ${keyToDelete}...`, 'info');
+        updateStatus(`${currentLanguage === 'zh-CN' ? '正在删除秘钥: ' : 
+                    currentLanguage === 'zh-TW' ? '正在刪除秘鑰: ' : 'Deleting key: '}${keyToDelete}...`, false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/keys?key=${currentKey}&keyToDelete=${keyToDelete}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                logAction("秘钥管理", data.message || "删除秘钥失败", 'error');
+                updateStatus(`${currentLanguage === 'zh-CN' ? '删除秘钥失败：' : 
+                            currentLanguage === 'zh-TW' ? '刪除秘鑰失敗：' : 'Failed to delete key: '}${data.message || '未知错误'}`, true);
+                return;
+            }
+
+            logAction("秘钥管理", `成功删除秘钥: ${keyToDelete}`, 'success');
+            updateStatus(`${currentLanguage === 'zh-CN' ? '成功删除秘钥: ' : 
+                        currentLanguage === 'zh-TW' ? '成功刪除秘鑰: ' : 'Successfully deleted key: '}${keyToDelete}`, false);
+            
+            fetchKeys();
+
+        } catch (error) {
+            updateStatus(`${currentLanguage === 'zh-CN' ? '删除秘钥失败：' : 
+                        currentLanguage === 'zh-TW' ? '刪除秘鑰失敗：' : 'Failed to delete key: '}${error.message}`, true);
+            logAction("秘钥管理", `删除秘钥失败：${error.message}`, 'error');
+        }
+    }
+
+    async function handleLogin() {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) {
+            return updateStatus(currentLanguage === 'zh-CN' ? "请输入邮箱和密码！" : 
+                              currentLanguage === 'zh-TW' ? "請輸入郵箱和密碼！" : "Please enter email and password!", true);
+        }
+        
+        updateStatus(currentLanguage === 'zh-CN' ? "正在登录..." : 
+                   currentLanguage === 'zh-TW' ? "正在登錄..." : "Logging in...", false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password, key: currentKey })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                logAction("登录", data.message || "登录失败", 'error');
+                throw new Error(data.message || "登录失败");
+            }
+
+            currentToken = data.data.idToken;
+            currentUser = data.data.email;
+            saveAuthToStorage(currentKey, currentToken, currentExpiryTime, currentUser);
+
+            updateStatus(currentLanguage === 'zh-CN' ? "登录成功！进入功能菜单。" : 
+                       currentLanguage === 'zh-TW' ? "登錄成功！進入功能菜單。" : "Login successful! Entering function menu.", false);
+            
+            // 管理员登录后显示功能菜单，普通用户也显示功能菜单
+            switchSection('menuButtons', ['keyForm', 'loginForm', 'adminPanel', 'adminChoice']);
+
+            logAction("登录", `用户 ${currentUser} 登录成功`, 'success');
+
+        } catch (error) {
+            updateStatus(`${currentLanguage === 'zh-CN' ? '登录失败：' : 
+                        currentLanguage === 'zh-TW' ? '登錄失敗：' : 'Login failed: '}${error.message}`, true);
+        }
+    }
+
+    async function handleKingRank() {
+        if (!checkLogin()) return;
+
+        if (isPasswordCard) {
+            alert(translations[currentLanguage].passwordCardKingWarning);
+            return;
+        }
+
+        logAction("等级设置", "开始尝试设置国王等级...", 'info');
+        updateStatus(currentLanguage === 'zh-CN' ? "正在尝试设置国王等级..." : 
+                   currentLanguage === 'zh-TW' ? "正在嘗試設置國王等級..." : "Setting king rank...", false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/king-rank`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${currentToken}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "设置国王等级失败！");
+            }
+
+            logAction("等级设置", data.message, 'success');
+            updateStatus(data.message, false);
+
+        } catch (error) {
+            updateStatus(`${currentLanguage === 'zh-CN' ? '等级设置失败：' : 
+                        currentLanguage === 'zh-TW' ? '等級設置失敗：' : 'Failed to set rank: '}${error.message}`, true);
+            logAction("等级设置", `设置失败: ${error.message}`, 'error');
+        }
+    }
+
+    async function handleChangeEmail() {
+        if (!checkLogin()) return;
+
+        if (isTestCard || isPasswordCard) {
+            alert(isTestCard ? translations[currentLanguage].testCardEmailWarning : translations[currentLanguage].passwordCardEmailWarning);
+            return;
+        }
+
+        const newEmail = prompt(`${currentLanguage === 'zh-CN' ? `请输入新的邮箱地址（当前: ${currentUser}）：` : 
+                               currentLanguage === 'zh-TW' ? `請輸入新的郵箱地址（當前: ${currentUser}）：` : 
+                               `Enter new email address (current: ${currentUser}):`}`);
+        if (!newEmail) return;
+
+        logAction("修改邮箱", `正在尝试修改邮箱至 ${newEmail}...`, 'info');
+        updateStatus(currentLanguage === 'zh-CN' ? "正在修改邮箱..." : 
+                   currentLanguage === 'zh-TW' ? "正在修改郵箱..." : "Changing email...", false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/change-email`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    idToken: currentToken,
+                    newEmail,
+                    oldEmail: currentUser,
+                    key: currentKey
+                }) 
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "修改邮箱失败！");
+            }
+
+            currentToken = data.data.idToken;
+            const oldUser = currentUser;
+            currentUser = data.data.email;
+            saveAuthToStorage(currentKey, currentToken, currentExpiryTime, currentUser);
+
+            logAction("修改邮箱", `成功从 ${oldUser} 修改为 ${currentUser}`, 'success');
+            updateStatus(currentLanguage === 'zh-CN' ? `邮箱修改成功！新邮箱: ${currentUser}` : 
+                       currentLanguage === 'zh-TW' ? `郵箱修改成功！新郵箱: ${currentUser}` : 
+                       `Email changed successfully! New email: ${currentUser}`, false);
+
+        } catch (error) {
+            updateStatus(`${currentLanguage === 'zh-CN' ? '修改失败：' : 
+                        currentLanguage === 'zh-TW' ? '修改失敗：' : 'Change failed: '}${error.message}`, true);
+            logAction("修改邮箱", `修改失败: ${error.message}`, 'error');
+        }
+    }
+
+    async function handleChangePassword() {
+        if (!checkLogin()) return;
+
+        if (isTestCard) {
+            alert(translations[currentLanguage].testCardPasswordWarning);
+            return;
+        }
+
+        const newPassword = prompt(currentLanguage === 'zh-CN' ? "请输入新密码（至少6位）：" : 
+                                 currentLanguage === 'zh-TW' ? "請輸入新密碼（至少6位）：" : 
+                                 "Enter new password (at least 6 characters):");
+        if (!newPassword) return;
+        if (newPassword.length < 6) {
+            return updateStatus(currentLanguage === 'zh-CN' ? "新密码长度不能少于6位！" : 
+                              currentLanguage === 'zh-TW' ? "新密碼長度不能少於6位！" : 
+                              "New password must be at least 6 characters!", true);
+        }
+
+        logAction("修改密码", "正在尝试修改密码...", 'info');
+        updateStatus(currentLanguage === 'zh-CN' ? "正在修改密码..." : 
+                   currentLanguage === 'zh-TW' ? "正在修改密碼..." : "Changing password...", false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/change-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    idToken: currentToken,
+                    newPassword,
+                    email: currentUser,
+                    key: currentKey
+                }) 
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "修改密码失败！");
+            }
+
+            currentToken = data.data.idToken;
+            saveAuthToStorage(currentKey, currentToken, currentExpiryTime, currentUser);
+
+            logAction("修改密码", "密码修改成功", 'success');
+            updateStatus(currentLanguage === 'zh-CN' ? "密码修改成功！" : 
+                       currentLanguage === 'zh-TW' ? "密碼修改成功！" : "Password changed successfully!", false);
+
+        } catch (error) {
+            updateStatus(`${currentLanguage === 'zh-CN' ? '修改失败：' : 
+                        currentLanguage === 'zh-TW' ? '修改失敗：' : 'Change failed: '}${error.message}`, true);
+            logAction("修改密码", `修改失败: ${error.message}`, 'error');
+        }
+    }
+
+    function handleSwitchAccount() {
+        currentUser = null;
+        currentToken = null;
+        localStorage.removeItem('idToken');
+        localStorage.removeItem('currentUser');
+        
+        if (isAdminMode) {
+            // 管理员切换账号时回到登录界面
+            switchSection('loginForm', ['menuButtons', 'adminPanel', 'adminChoice']);
+            updateStatus(currentLanguage === 'zh-CN' ? "请登录新的游戏账号" : 
+                       currentLanguage === 'zh-TW' ? "請登錄新的遊戲賬號" : "Please login with new game account", false);
+        } else {
+            switchSection('loginForm', ['menuButtons', 'adminPanel', 'adminChoice']);
+            updateStatus(currentLanguage === 'zh-CN' ? "请登录新的游戏账号" : 
+                       currentLanguage === 'zh-TW' ? "請登錄新的遊戲賬號" : "Please login with new game account", false);
+        }
+        
+        logAction("切换账号", "切换到新账号登录", 'info');
+    }
+
+    function handleSwitchKey() {
+        handleLogout(true);
+        switchSection('keyForm', ['loginForm', 'menuButtons', 'adminPanel', 'adminChoice']);
+        updateStatus(currentLanguage === 'zh-CN' ? "请输入新的秘钥" : 
+                   currentLanguage === 'zh-TW' ? "請輸入新的秘鑰" : "Please enter new key", false);
+        logAction("切换秘钥", "切换到新秘钥输入", 'info');
+    }
+
+    function handleReturnHome() {
+        // 返回首页时总是显示秘钥验证页面，并显示广告
+        switchSection('keyForm', ['loginForm', 'menuButtons', 'adminPanel', 'adminChoice']);
+        updateStatus(currentLanguage === 'zh-CN' ? "请输入秘钥验证" : 
+                   currentLanguage === 'zh-TW' ? "請輸入秘鑰驗證" : "Please verify key first", false);
+        logAction("导航", "返回首页", 'info');
+    }
+
+    function handleLogout(silent = false) {
+        localStorage.removeItem('accessKey');
+        localStorage.removeItem('idToken');
+        localStorage.removeItem('expiryTime');
+        localStorage.removeItem('currentUser');
+        
+        currentUser = null;
+        currentToken = null;
+        currentKey = null;
+        isAdminMode = false;
+        isSuperAdmin = false;
+        isTestCard = false;
+        isPasswordCard = false;
+
+        document.getElementById('accessKey').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('adminPanel').style.display = 'none';
+        updateBindInfo();
+        updateCardStatus(false, false);
+        
+        updateExpiryDisplay(null, null, null, true);
+        switchSection('keyForm', ['loginForm', 'menuButtons', 'adminPanel', 'adminChoice']);
+
+        if (!silent) {
+            updateStatus(currentLanguage === 'zh-CN' ? "已成功退出登录，请重新验证秘钥" : 
+                       currentLanguage === 'zh-TW' ? "已成功退出登錄，請重新驗證秘鑰" : "Logged out successfully, please verify key again");
+            logAction("退出", "用户已退出登录", 'info');
+        }
+    }
+
+    function initAuthCheck() {
+        logAction("系统初始化", "检查本地登录状态", 'info');
+        const hasStored = loadAuthFromStorage();
+        
+        if (hasStored && currentKey) {
+            updateStatus(currentLanguage === 'zh-CN' ? "发现上次登录状态，正在重新验证秘钥..." : 
+                       currentLanguage === 'zh-TW' ? "發現上次登錄狀態，正在重新驗證秘鑰..." : 
+                       "Found previous login status, re-verifying key...", false);
+            document.getElementById('accessKey').value = currentKey; 
+            
+            handleCheckKey(currentKey).then(() => {
+                if(isAdminMode && currentUser && currentToken) {
+                    updateStatus(currentLanguage === 'zh-CN' ? `欢迎回来，${isSuperAdmin ? '超级管理员' : '管理员'} ${currentUser}。` : 
+                               currentLanguage === 'zh-TW' ? `歡迎回來，${isSuperAdmin ? '超級管理員' : '管理員'} ${currentUser}。` : 
+                               `Welcome back, ${isSuperAdmin ? 'super admin' : 'admin'} ${currentUser}.`);
+                    switchSection('menuButtons', ['keyForm', 'loginForm', 'adminPanel', 'adminChoice']);
+                } else if(currentUser && currentToken) {
+                    updateStatus(currentLanguage === 'zh-CN' ? `欢迎回来，${currentUser}。` : 
+                               currentLanguage === 'zh-TW' ? `歡迎回來，${currentUser}。` : 
+                               `Welcome back, ${currentUser}.`);
+                    switchSection('menuButtons', ['keyForm', 'loginForm', 'adminPanel', 'adminChoice']);
+                } else if (isAdminMode && !currentUser) {
+                    // 管理员但未登录游戏账号，显示管理员面板
+                    switchSection('adminPanel', ['keyForm', 'loginForm', 'menuButtons', 'adminChoice']);
+                    updateAdminUI();
+                    fetchKeys();
+                }
+            }); 
+        } else {
+            switchSection('keyForm', ['loginForm', 'menuButtons', 'adminPanel', 'adminChoice']);
+            updateStatus(currentLanguage === 'zh-CN' ? "请先输入秘钥验证" : 
+                       currentLanguage === 'zh-TW' ? "請先輸入秘鑰驗證" : "Please verify key first");
+        }
+    }
+
+    // =================================================================
+    // CPMCY克隆工具功能
+    // =================================================================
+
+    // CPM克隆工具的JavaScript代码
+    document.addEventListener('DOMContentLoaded', function() {
+        // 粒子效果
+        createParticles();
+        
+        applyTranslations();
+        
+        initAuthCheck();
+
+        // 默认选择全功能卡
+        selectKeyType('full');
+
+        // 操作类型切换
+        document.querySelectorAll('input[name="operation-type"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const targetCredentials = document.getElementById('target-credentials');
+                if (this.value === 'clone-to-new') {
+                    targetCredentials.classList.remove('hidden');
+                } else {
+                    targetCredentials.classList.add('hidden');
+                }
+            });
+        });
+
+        // CPM克隆登录
+        document.getElementById('login-btn-clone').addEventListener('click', function() {
+            const email = document.getElementById('source-email').value.trim();
+            const password = document.getElementById('source-password').value;
+            
+            if (!email || !password) {
+                showCloneStatus('请输入邮箱和密码', 'error');
+                return;
+            }
+            
+            showCloneStatus('正在登录...', 'info');
+            this.disabled = true;
+            
+            // 这里应该调用实际的API
+            setTimeout(() => {
+                // 模拟登录成功
+                showCloneStatus('登录成功！正在获取账号信息...', 'success');
+                
+                // 模拟获取账号信息
+                setTimeout(() => {
+                    // 更新账号信息显示
+                    document.getElementById('account-name').textContent = '玩家' + Math.floor(Math.random() * 10000);
+                    document.getElementById('account-money').textContent = (Math.random() * 1000000).toFixed(0) + '金币';
+                    document.getElementById('account-cars').textContent = Math.floor(Math.random() * 50);
+                    document.getElementById('account-localid').textContent = generateLocalID();
+                    document.getElementById('account-status').textContent = '已登录';
+                    
+                    // 显示账号信息
+                    document.getElementById('account-info-section-clone').classList.remove('hidden');
+                    document.getElementById('logout-btn-clone').style.display = 'block';
+                    document.getElementById('login-section-clone').classList.add('hidden');
+                    document.getElementById('clone-section-clone').classList.remove('hidden');
+                    
+                    showCloneStatus('账号信息获取完成！', 'success');
+                    this.disabled = false;
+                }, 1500);
+            }, 1000);
+        });
+
+        // CPM克隆执行
+        document.getElementById('clone-btn-clone').addEventListener('click', function() {
+            const operationType = document.querySelector('input[name="operation-type"]:checked').value;
+            const customLocalID = document.getElementById('custom-localid').value.trim();
+            const targetEmail = document.getElementById('target-email').value.trim();
+            const targetPassword = document.getElementById('target-password').value;
+            
+            if (!customLocalID) {
+                showCloneStatus('请输入自定义Local ID', 'error');
+                return;
+            }
+            
+            if (operationType === 'clone-to-new' && (!targetEmail || !targetPassword)) {
+                showCloneStatus('请输入目标账号的邮箱和密码', 'error');
+                return;
+            }
+            
+            if (!confirm('确定要执行克隆操作吗？此操作不可逆！')) {
+                return;
+            }
+            
+            showCloneStatus('开始克隆操作...', 'info');
+            this.disabled = true;
+            
+            // 显示进度条
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const statusLog = document.getElementById('status-log');
+            
+            progressBar.style.width = '0%';
+            progressText.textContent = '准备开始...';
+            
+            // 清空日志
+            statusLog.innerHTML = '';
+            
+            // 模拟克隆过程
+            let progress = 0;
+            const steps = [
+                '正在连接CPM服务器...',
+                '正在验证账号信息...',
+                '正在备份源账号数据...',
+                '正在处理Local ID修改...',
+                '正在传输车辆数据...',
+                '正在传输金币数据...',
+                '正在验证目标账号...',
+                '正在写入目标账号...',
+                '正在验证数据完整性...',
+                '克隆完成！'
+            ];
+            
+            const interval = setInterval(() => {
+                if (progress < steps.length) {
+                    progress += 1;
+                    const percentage = (progress / steps.length) * 100;
+                    progressBar.style.width = `${percentage}%`;
+                    progressText.textContent = steps[progress - 1];
+                    
+                    // 添加日志
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    logEntry.innerHTML = `<i class="fas fa-info-circle"></i> ${steps[progress - 1]}`;
+                    statusLog.prepend(logEntry);
+                    
+                    if (progress === steps.length) {
+                        clearInterval(interval);
+                        showCloneStatus('克隆操作完成！', 'success');
+                        this.disabled = false;
+                        
+                        // 添加成功日志
+                        const successLog = document.createElement('div');
+                        successLog.className = 'log-entry';
+                        successLog.innerHTML = `<i class="fas fa-check-circle" style="color: #2ecc71;"></i> 克隆操作已成功完成！`;
+                        statusLog.prepend(successLog);
+                    }
+                }
+            }, 3000);
+        });
+
+        // 克隆工具退出登录
+        document.getElementById('logout-btn-clone').addEventListener('click', function() {
+            // 隐藏账号信息
+            document.getElementById('account-info-section-clone').classList.add('hidden');
+            this.style.display = 'none';
+            document.getElementById('login-section-clone').classList.remove('hidden');
+            document.getElementById('clone-section-clone').classList.add('hidden');
+            
+            // 清空表单
+            document.getElementById('source-email').value = '';
+            document.getElementById('source-password').value = '';
+            document.getElementById('custom-localid').value = '';
+            document.getElementById('target-email').value = '';
+            document.getElementById('target-password').value = '';
+            
+            showCloneStatus('已退出登录', 'info');
+        });
+    });
+
+    function generateLocalID() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 16; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    function showCloneStatus(message, type) {
+        const statusEl = document.getElementById('clone-status');
+        statusEl.textContent = message;
+        statusEl.style.display = 'block';
+        
+        if (type === 'error') {
+            statusEl.className = 'neon-status error';
+        } else if (type === 'success') {
+            statusEl.className = 'neon-status success';
+        } else {
+            statusEl.className = 'neon-status';
+        }
+        
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            statusEl.style.display = 'none';
+        }, 3000);
+    }
+
+    // 粒子效果
+    function createParticles() {
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 50;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // 随机位置
+            const size = Math.random() * 3 + 1;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${Math.random() * 100}vw`;
+            particle.style.opacity = Math.random() * 0.5 + 0.3;
+            
+            // 随机颜色
+            const colors = [
+                'rgba(255, 149, 0, 0.8)',
+                'rgba(255, 45, 85, 0.8)',
+                'rgba(175, 82, 222, 0.8)',
+                'rgba(0, 122, 255, 0.8)',
+                'rgba(52, 199, 89, 0.8)'
+            ];
+            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // 随机动画
+            particle.style.setProperty('--x', Math.random());
+            particle.style.animationDuration = `${Math.random() * 10 + 15}s`;
+            particle.style.animationDelay = `${Math.random() * 5}s`;
+            
+            particlesContainer.appendChild(particle);
+        }
+    }
+
+    // API请求函数
+    window.makeAPIRequest = async function(url, data) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('API request error:', error);
+            return { ok: false, message: '网络请求失败' };
+        }
+    };
+</script>
+
+<!-- app.js 内容 -->
+<script>
+// app.js - CPM克隆工具主要功能
+(function() {
+    'use strict';
+    
+    // 全局变量
+    let currentAccount = null;
+    let cloneProcessActive = false;
+    let progressInterval = null;
+    
+    // 初始化克隆工具
+    function initCloneTool() {
+        console.log('🔧 CPM克隆工具初始化完成');
+        
+        // 绑定事件监听器
+        bindEvents();
+        
+        // 恢复会话状态
+        restoreSession();
+    }
+    
+    // 绑定事件
+    function bindEvents() {
+        // 操作类型切换
+        document.querySelectorAll('input[name="operation-type"]').forEach(radio => {
+            radio.addEventListener('change', handleOperationTypeChange);
+        });
+        
+        // 登录按钮
+        const loginBtn = document.getElementById('login-btn-clone');
+        if (loginBtn) {
+            loginBtn.addEventListener('click', handleCloneLogin);
+        }
+        
+        // 克隆按钮
+        const cloneBtn = document.getElementById('clone-btn-clone');
+        if (cloneBtn) {
+            cloneBtn.addEventListener('click', handleCloneExecute);
+        }
+        
+        // 退出登录按钮
+        const logoutBtn = document.getElementById('logout-btn-clone');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleCloneLogout);
+        }
+        
+        // 输入框回车事件
+        const passwordInput = document.getElementById('source-password');
+        if (passwordInput) {
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleCloneLogin();
+                }
+            });
+        }
+        
+        const targetPasswordInput = document.getElementById('target-password');
+        if (targetPasswordInput) {
+            targetPasswordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleCloneExecute();
+                }
+            });
+        }
+    }
+    
+    // 恢复会话状态
+    function restoreSession() {
+        const savedAccount = localStorage.getItem('cpmcy_account_data');
+        if (savedAccount) {
+            try {
+                currentAccount = JSON.parse(savedAccount);
+                if (currentAccount && currentAccount.email) {
+                    // 恢复账号信息显示
+                    updateAccountDisplay(currentAccount);
+                    showAccountInfo();
+                }
+            } catch (e) {
+                console.error('恢复会话失败:', e);
+                localStorage.removeItem('cpmcy_account_data');
+            }
+        }
+    }
+    
+    // 操作类型切换处理
+    function handleOperationTypeChange(event) {
+        const targetCredentials = document.getElementById('target-credentials');
+        const customIdGroup = document.getElementById('custom-id-group');
+        
+        if (event.target.value === 'clone-to-new') {
+            targetCredentials.classList.remove('hidden');
+            
+            // 更新自定义ID输入框的placeholder
+            const customIdInput = document.getElementById('custom-localid');
+            if (customIdInput) {
+                customIdInput.placeholder = '输入新的Local ID（将覆盖目标账号）';
+            }
+        } else {
+            targetCredentials.classList.add('hidden');
+            
+            // 恢复自定义ID输入框的placeholder
+            const customIdInput = document.getElementById('custom-localid');
+            if (customIdInput) {
+                customIdInput.placeholder = '输入新的Local ID（字母数字，建议10-20位）';
+            }
+        }
+    }
+    
+    // 克隆登录处理
+    async function handleCloneLogin() {
+        const email = document.getElementById('source-email').value.trim();
+        const password = document.getElementById('source-password').value;
+        const loginBtn = document.getElementById('login-btn-clone');
+        const loginStatus = document.getElementById('login-status');
+        
+        // 验证输入
+        if (!email || !password) {
+            showStatus(loginStatus, '请输入邮箱和密码', 'error');
+            return;
+        }
+        
+        // 验证邮箱格式
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showStatus(loginStatus, '邮箱格式不正确', 'error');
+            return;
+        }
+        
+        // 验证密码长度
+        if (password.length < 6) {
+            showStatus(loginStatus, '密码长度至少6位', 'error');
+            return;
+        }
+        
+        // 禁用按钮，显示加载状态
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 登录中...';
+        showStatus(loginStatus, '正在连接服务器...', 'info');
+        
+        try {
+            // 这里应该调用实际的登录API
+            // 模拟API调用延迟
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // 模拟登录成功
+            const mockAccountData = {
+                email: email,
+                name: '玩家' + Math.floor(Math.random() * 10000),
+                money: Math.floor(Math.random() * 1000000),
+                cars: Math.floor(Math.random() * 50),
+                localid: generateLocalID(),
+                level: Math.floor(Math.random() * 100),
+                lastLogin: new Date().toLocaleString()
+            };
+            
+            // 保存账号数据
+            currentAccount = mockAccountData;
+            localStorage.setItem('cpmcy_account_data', JSON.stringify(mockAccountData));
+            
+            // 更新界面显示
+            updateAccountDisplay(mockAccountData);
+            showAccountInfo();
+            
+            // 显示成功状态
+            showStatus(loginStatus, '登录成功！账号信息已加载', 'success');
+            
+            // 记录日志
+            addLogEntry(`用户 ${email} 登录成功`, 'success');
+            
+        } catch (error) {
+            // 处理错误
+            showStatus(loginStatus, `登录失败: ${error.message || '未知错误'}`, 'error');
+            addLogEntry(`登录失败: ${error.message || '未知错误'}`, 'error');
+        } finally {
+            // 恢复按钮状态
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-key"></i> 登录并验证账号';
+        }
+    }
+    
+    // 克隆执行处理
+    async function handleCloneExecute() {
+        // 检查是否已登录
+        if (!currentAccount) {
+            alert('请先登录源账号！');
+            return;
+        }
+        
+        const operationType = document.querySelector('input[name="operation-type"]:checked').value;
+        const customLocalID = document.getElementById('custom-localid').value.trim();
+        const targetEmail = document.getElementById('target-email').value.trim();
+        const targetPassword = document.getElementById('target-password').value;
+        const cloneBtn = document.getElementById('clone-btn-clone');
+        const cloneStatus = document.getElementById('clone-status');
+        
+        // 验证输入
+        if (!customLocalID) {
+            showStatus(cloneStatus, '请输入自定义Local ID', 'error');
+            return;
+        }
+        
+        // 验证Local ID格式
+        if (customLocalID.length < 10 || customLocalID.length > 20) {
+            showStatus(cloneStatus, 'Local ID长度应在10-20位之间', 'error');
+            return;
+        }
+        
+        if (operationType === 'clone-to-new') {
+            if (!targetEmail || !targetPassword) {
+                showStatus(cloneStatus, '请输入目标账号的邮箱和密码', 'error');
+                return;
+            }
+            
+            // 验证目标邮箱格式
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(targetEmail)) {
+                showStatus(cloneStatus, '目标邮箱格式不正确', 'error');
+                return;
+            }
+            
+            // 不能克隆到同一个账号
+            if (targetEmail === currentAccount.email) {
+                showStatus(cloneStatus, '不能克隆到同一个账号', 'error');
+                return;
+            }
+            
+            // 验证目标密码长度
+            if (targetPassword.length < 6) {
+                showStatus(cloneStatus, '目标密码长度至少6位', 'error');
+                return;
+            }
+        }
+        
+        // 确认对话框
+        const confirmMessage = operationType === 'modify-id' 
+            ? `确定要修改当前账号的Local ID为 ${customLocalID} 吗？`
+            : `确定要将当前账号数据克隆到 ${targetEmail} 吗？\n目标账号的所有数据将被覆盖！`;
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+        
+        // 防止重复执行
+        if (cloneProcessActive) {
+            showStatus(cloneStatus, '克隆操作正在进行中，请等待完成', 'warning');
+            return;
+        }
+        
+        // 禁用按钮，开始克隆过程
+        cloneProcessActive = true;
+        cloneBtn.disabled = true;
+        cloneBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 克隆中...';
+        
+        // 显示进度条
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const statusLog = document.getElementById('status-log');
+        
+        // 初始化进度
+        progressBar.style.width = '0%';
+        progressText.textContent = '准备开始克隆操作...';
+        
+        // 清空日志
+        statusLog.innerHTML = '';
+        addLogEntry('开始克隆操作...', 'info');
+        
+        try {
+            // 克隆步骤配置
+            const steps = operationType === 'modify-id' 
+                ? getModifyIdSteps(customLocalID)
+                : getCloneSteps(targetEmail, customLocalID);
+            
+            let currentStep = 0;
+            
+            // 设置进度更新间隔
+            progressInterval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    const step = steps[currentStep];
+                    const percentage = ((currentStep + 1) / steps.length) * 100;
+                    
+                    // 更新进度条
+                    progressBar.style.width = `${percentage}%`;
+                    progressText.textContent = step.message;
+                    
+                    // 添加日志
+                    addLogEntry(step.message, step.type || 'info');
+                    
+                    // 如果步骤有延迟，等待
+                    if (step.delay) {
+                        setTimeout(() => {
+                            currentStep++;
+                        }, step.delay);
+                    } else {
+                        currentStep++;
+                    }
+                    
+                    // 如果是最后一步，完成克隆
+                    if (currentStep === steps.length) {
+                        clearInterval(progressInterval);
+                        completeCloneProcess(operationType, customLocalID, targetEmail);
+                    }
+                }
+            }, 2000);
+            
+        } catch (error) {
+            handleCloneError(error);
+        }
+    }
+    
+    // 获取修改ID的步骤
+    function getModifyIdSteps(newLocalID) {
+        return [
+            { message: '正在验证当前账号...', delay: 1000 },
+            { message: '正在备份当前账号数据...', delay: 1500 },
+            { message: `正在修改Local ID为 ${newLocalID}...`, delay: 2000 },
+            { message: '正在更新服务器记录...', delay: 1500 },
+            { message: '正在验证修改结果...', delay: 1000 },
+            { message: 'Local ID修改完成！', delay: 0 }
+        ];
+    }
+    
+    // 获取克隆的步骤
+    function getCloneSteps(targetEmail, newLocalID) {
+        return [
+            { message: '正在验证源账号数据...', delay: 1000 },
+            { message: '正在连接目标账号...', delay: 1500 },
+            { message: '正在备份源账号数据...', delay: 2000 },
+            { message: `正在修改Local ID为 ${newLocalID}...`, delay: 1500 },
+            { message: `正在克隆数据到 ${targetEmail}...`, delay: 2500 },
+            { message: '正在传输车辆数据...', delay: 2000 },
+            { message: '正在传输金币数据...', delay: 1500 },
+            { message: '正在验证数据完整性...', delay: 1000 },
+            { message: '克隆操作完成！', delay: 0 }
+        ];
+    }
+    
+    // 完成克隆过程
+    function completeCloneProcess(operationType, customLocalID, targetEmail) {
+        const cloneBtn = document.getElementById('clone-btn-clone');
+        const cloneStatus = document.getElementById('clone-status');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        // 更新当前账号的Local ID
+        if (operationType === 'modify-id') {
+            currentAccount.localid = customLocalID;
+            localStorage.setItem('cpmcy_account_data', JSON.stringify(currentAccount));
+            updateAccountDisplay(currentAccount);
+            
+            addLogEntry(`Local ID已成功修改为 ${customLocalID}`, 'success');
+            showStatus(cloneStatus, 'Local ID修改成功！', 'success');
+        } else {
+            addLogEntry(`账号数据已成功克隆到 ${targetEmail}`, 'success');
+            showStatus(cloneStatus, '克隆操作完成！', 'success');
+        }
+        
+        // 更新进度显示
+        progressBar.style.width = '100%';
+        progressText.textContent = operationType === 'modify-id' ? 'Local ID修改完成！' : '克隆操作完成！';
+        
+        // 恢复按钮状态
+        cloneBtn.disabled = false;
+        cloneBtn.innerHTML = '<i class="fas fa-clone"></i> 开始执行';
+        cloneProcessActive = false;
+        
+        // 显示成功消息
+        const successMessage = operationType === 'modify-id' 
+            ? `Local ID已成功修改为: ${customLocalID}`
+            : `账号数据已成功克隆到: ${targetEmail}`;
+        
+        alert(`✅ ${successMessage}\n\n请重新登录验证操作结果。`);
+    }
+    
+    // 处理克隆错误
+    function handleCloneError(error) {
+        const cloneBtn = document.getElementById('clone-btn-clone');
+        const cloneStatus = document.getElementById('clone-status');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        // 清除进度间隔
+        if (progressInterval) {
+            clearInterval(progressInterval);
+        }
+        
+        // 更新进度显示
+        progressBar.style.width = '0%';
+        progressText.textContent = '克隆操作失败';
+        
+        // 添加错误日志
+        addLogEntry(`克隆失败: ${error.message || '未知错误'}`, 'error');
+        
+        // 显示错误状态
+        showStatus(cloneStatus, `克隆失败: ${error.message || '未知错误'}`, 'error');
+        
+        // 恢复按钮状态
+        cloneBtn.disabled = false;
+        cloneBtn.innerHTML = '<i class="fas fa-clone"></i> 开始执行';
+        cloneProcessActive = false;
+    }
+    
+    // 克隆退出登录
+    function handleCloneLogout() {
+        if (!currentAccount) return;
+        
+        if (confirm('确定要退出登录吗？')) {
+            // 清空当前账号
+            currentAccount = null;
+            localStorage.removeItem('cpmcy_account_data');
+            
+            // 隐藏账号信息
+            document.getElementById('account-info-section-clone').classList.add('hidden');
+            document.getElementById('logout-btn-clone').style.display = 'none';
+            document.getElementById('login-section-clone').classList.remove('hidden');
+            document.getElementById('clone-section-clone').classList.add('hidden');
+            
+            // 清空表单
+            document.getElementById('source-email').value = '';
+            document.getElementById('source-password').value = '';
+            document.getElementById('custom-localid').value = '';
+            document.getElementById('target-email').value = '';
+            document.getElementById('target-password').value = '';
+            
+            // 重置进度条
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const statusLog = document.getElementById('status-log');
+            
+            progressBar.style.width = '0%';
+            progressText.textContent = '准备开始...';
+            statusLog.innerHTML = '<div class="log-entry"><i class="fas fa-info-circle"></i> 系统已就绪，请先登录源账号</div>';
+            
+            // 添加日志
+            addLogEntry('用户已退出登录', 'info');
+            
+            // 显示状态
+            const cloneStatus = document.getElementById('clone-status');
+            showStatus(cloneStatus, '已退出登录', 'info');
+        }
+    }
+    
+    // 更新账号信息显示
+    function updateAccountDisplay(accountData) {
+        document.getElementById('account-name').textContent = accountData.name || '未知';
+        document.getElementById('account-money').textContent = (accountData.money || 0).toLocaleString() + '金币';
+        document.getElementById('account-cars').textContent = accountData.cars || 0;
+        document.getElementById('account-localid').textContent = accountData.localid || '未知';
+        document.getElementById('account-status').textContent = '已登录';
+        
+        // 更新自定义ID输入框的默认值
+        const customIdInput = document.getElementById('custom-localid');
+        if (customIdInput && !customIdInput.value) {
+            // 生成一个推荐的Local ID
+            const recommendedID = generateRecommendedLocalID(accountData.localid);
+            customIdInput.value = recommendedID;
+            customIdInput.placeholder = '推荐使用此ID或自定义';
+        }
+    }
+    
+    // 显示账号信息
+    function showAccountInfo() {
+        document.getElementById('account-info-section-clone').classList.remove('hidden');
+        document.getElementById('logout-btn-clone').style.display = 'block';
+        document.getElementById('login-section-clone').classList.add('hidden');
+        document.getElementById('clone-section-clone').classList.remove('hidden');
+    }
+    
+    // 生成推荐的Local ID
+    function generateRecommendedLocalID(currentLocalID) {
+        if (!currentLocalID || currentLocalID === '未知') {
+            return generateLocalID();
+        }
+        
+        // 在原有ID基础上添加时间戳后缀
+        const timestamp = Date.now().toString(36);
+        return currentLocalID.substring(0, 10) + '_' + timestamp.substring(0, 6);
+    }
+    
+    // 生成随机Local ID
+    function generateLocalID() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        const length = 16;
+        
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        
+        return result;
+    }
+    
+    // 显示状态消息
+    function showStatus(element, message, type) {
+        if (!element) return;
+        
+        element.textContent = message;
+        element.className = 'neon-status';
+        
+        if (type === 'error') {
+            element.classList.add('error');
+        } else if (type === 'success') {
+            element.classList.add('success');
+        } else if (type === 'warning') {
+            element.classList.add('admin');
+        } else {
+            element.classList.add('test-card');
+        }
+        
+        element.style.display = 'block';
+        
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            element.style.display = 'none';
+        }, 3000);
+    }
+    
+    // 添加日志条目
+    function addLogEntry(message, type = 'info') {
+        const statusLog = document.getElementById('status-log');
+        if (!statusLog) return;
+        
+        const now = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        
+        let icon = 'info-circle';
+        let color = '#6a11cb';
+        
+        switch (type) {
+            case 'success':
+                icon = 'check-circle';
+                color = '#2ecc71';
+                break;
+            case 'error':
+                icon = 'exclamation-circle';
+                color = '#ff416c';
+                break;
+            case 'warning':
+                icon = 'exclamation-triangle';
+                color = '#ff9500';
+                break;
+        }
+        
+        logEntry.innerHTML = `<i class="fas fa-${icon}" style="color: ${color};"></i> [${now}] ${message}`;
+        
+        // 添加到日志顶部
+        statusLog.insertBefore(logEntry, statusLog.firstChild);
+        
+        // 限制日志数量
+        const maxLogs = 20;
+        while (statusLog.children.length > maxLogs) {
+            statusLog.removeChild(statusLog.lastChild);
+        }
+    }
+    
+    // 工具函数：格式化时间
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    // 工具函数：验证Local ID格式
+    function isValidLocalID(localID) {
+        if (!localID || localID.length < 10 || localID.length > 20) {
+            return false;
+        }
+        
+        // 只能包含字母数字
+        const regex = /^[a-zA-Z0-9]+$/;
+        return regex.test(localID);
+    }
+    
+    // 导出全局函数
+    window.CPMCloneTool = {
+        init: initCloneTool,
+        login: handleCloneLogin,
+        execute: handleCloneExecute,
+        logout: handleCloneLogout,
+        getAccount: () => currentAccount,
+        isValidLocalID: isValidLocalID,
+        generateLocalID: generateLocalID
+    };
+    
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        // 延迟初始化以确保DOM完全加载
+        setTimeout(initCloneTool, 500);
+        
+        // 在控制台输出调试信息
+        console.log('🚀 CPM克隆工具 v2.3 已加载');
+        console.log('📖 可用命令:');
+        console.log('  - CPMCloneTool.init() - 重新初始化工具');
+        console.log('  - CPMCloneTool.login() - 模拟登录');
+        console.log('  - CPMCloneTool.execute() - 执行克隆');
+        console.log('  - CPMCloneTool.logout() - 退出登录');
+        console.log('  - CPMCloneTool.getAccount() - 获取当前账号信息');
+    });
+    
+})();
+
+   <script src="app.js"></script>
+</body>
+</html>
