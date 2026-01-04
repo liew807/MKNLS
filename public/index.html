@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>快手季伯常CPM专用工具 - 登录</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container glow-border">
+    <h1 class="title grad-text">快手季伯常CPM专用工具</h1>
+    <p class="subtitle">作者：快手季伯常 | 支持自定义LocalID、克隆到已注册账号</p>
+    
+    <div id="message" class="message" style="display: none;"></div>
+    
+    <form id="login-form">
+      <div class="form-group">
+        <label for="email">账号邮箱（已注册）</label>
+        <input type="email" id="email" required placeholder="请输入游戏账号邮箱">
+      </div>
+      <div class="form-group">
+        <label for="password">账号密码</label>
+        <input type="password" id="password" required placeholder="请输入游戏账号密码">
+      </div>
+      <button type="submit" class="btn">登录</button>
+    </form>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById('login-form');
+    const message = document.getElementById('message');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+
+        if (data.ok) {
+          localStorage.setItem('authToken', data.authToken);
+          window.location.href = 'dashboard.html';
+        } else {
+          showMessage(data.message, 'error');
+        }
+      } catch (error) {
+        showMessage('网络错误，请重试', 'error');
+      }
+    });
+
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = `message ${type}`;
+      message.style.display = 'block';
+      setTimeout(() => {
+        message.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
