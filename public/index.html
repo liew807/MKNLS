@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPMCY - CPM账号克隆工具</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="author" content="快手Jack">
+    <style>
+        /* 添加日志相关样式 */
+        .logs-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(106, 17, 203, 0.3);
+        }
+        
+        .logs-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 3px solid #6a11cb;
+        }
+        
+        .stat-label {
+            color: #a0a0c0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .logs-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .logs-filter, .logs-search {
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        
+        .logs-filter {
+            min-width: 150px;
+        }
+        
+        .logs-search {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .logs-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 600px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .logs-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .logs-table th {
+            background: rgba(40, 40, 60, 0.95);
+            padding: 12px 15px;
+            text-align: left;
+            color: #fff;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(106, 17, 203, 0.3);
+        }
+        
+        .logs-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #d0d0e0;
+        }
+        
+        .logs-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .log-type {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        
+        .log-type-login { background: rgba(41, 128, 185, 0.2); color: #3498db; }
+        .log-type-game { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+        .log-type-purchase { background: rgba(39, 174, 96, 0.2); color: #2ecc71; }
+        .log-type-system { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
+        .log-type-error { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .log-type-info { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        
+        .log-time {
+            font-family: 'Consolas', monospace;
+            color: #a0a0c0;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        
+        .log-message {
+            color: #e0e0f0;
+            line-height: 1.5;
+            max-width: 500px;
+            word-break: break-word;
+        }
+        
+        .log-ip {
+            font-family: 'Consolas', monospace;
+            color: #a0a0c0;
+            font-size: 0.85rem;
+        }
+        
+        .log-device {
+            color: #b0b0d0;
+            font-size: 0.85rem;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #a0a0c0;
+        }
+        
+        .loading i {
+            margin-right: 10px;
+        }
+        
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #a0a0c0;
+        }
+        
+        .no-logs i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .logs-status {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-user-shield"></i> CPMCY- CPM账号克隆工具</h1>
+            <p class="subtitle">快手Jack制作 | 克隆CPM账号数据到其他账号</p>
+        </header>
+
+        <!-- 登录部分 -->
+        <div class="card" id="login-section">
+            <h2><i class="fas fa-sign-in-alt"></i> 第一步：源账号登录</h2>
+            <p class="info-text">请登录要被克隆的源账号（你的主账号）</p>
+            
+            <div class="form-group">
+                <label for="source-email">邮箱地址</label>
+                <input type="email" id="source-email" placeholder="输入CPM账号邮箱" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="source-password">密码</label>
+                <input type="password" id="source-password" placeholder="输入CPM账号密码" required>
+            </div>
+            
+            <button id="login-btn" class="btn btn-primary">
+                <i class="fas fa-key"></i> 登录并验证账号
+            </button>
+            
+            <div id="login-status" class="status"></div>
+        </div>
+
+        <!-- 账号信息展示区 -->
+        <div class="card hidden" id="account-info-section">
+            <h2><i class="fas fa-user-circle"></i> 当前账号信息</h2>
+            <div class="account-details">
+                <div class="info-row">
+                    <span class="info-label">账号昵称:</span>
+                    <span class="info-value" id="account-name">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">游戏金币:</span>
+                    <span class="info-value" id="account-money">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">绿钞:</span>
+                    <span class="info-value" id="account-green-cash">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">车辆数量:</span>
+                    <span class="info-value" id="account-cars">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Local ID:</span>
+                    <span class="info-value" id="account-localid">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">账号状态:</span>
+                    <span class="info-value status-badge" id="account-status">未登录</span>
+                </div>
+            </div>
+            
+            <!-- 货币修改部分 -->
+            <div class="money-section hidden" id="money-section" style="margin-top: 20px;">
+                <h3><i class="fas fa-coins"></i> 货币修改</h3>
+                
+                <div class="operation-options">
+                    <div class="option-item">
+                        <input type="radio" id="money-op1" name="money-operation" value="set" checked>
+                        <label for="money-op1">
+                            <strong>设置为指定值</strong><br>
+                            <small>将货币设置为指定的数值</small>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="money-op2" name="money-operation" value="add">
+                        <label for="money-op2">
+                            <strong>增加指定值</strong><br>
+                            <small>在当前基础上增加数值</small>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <input type="radio" id="money-op3" name="money-operation" value="max">
+                        <label for="money-op3">
+                            <strong>设置为最大值</strong><br>
+                            <small>将货币设置为最大值</small>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="green-cash">绿钞数量</label>
+                    <input type="number" id="green-cash" placeholder="输入绿钞数量（可选）" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="gold-coins">金币数量</label>
+                    <input type="number" id="gold-coins" placeholder="输入金币数量（可选）" min="0">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button id="modify-money-btn" class="btn btn-danger" style="flex: 1;">
+                        <i class="fas fa-coins"></i> 确认修改货币
+                    </button>
+                    <button id="refresh-money-btn" class="btn btn-secondary">
+                        <i class="fas fa-sync-alt"></i> 刷新
+                    </button>
+                </div>
+                
+                <div id="money-status" class="status"></div>
+            </div>
+            
+            <!-- 克隆操作部分 -->
+            <div class="clone-section hidden" id="clone-section" style="margin-top: 30px;">
+                <h3><i class="fas fa-clone"></i> 第二步：克隆操作</h3>
+                
+                <div class="form-group">
+                    <label for="operation-type">选择操作类型</label>
+                    <div class="operation-options">
+                        <div class="option-item">
+                            <input type="radio" id="op-type1" name="operation-type" value="modify-id" checked>
+                            <label for="op-type1">
+                                <strong>修改当前账号ID</strong><br>
+                                <small>仅修改当前登录账号的Local ID</small>
+                            </label>
+                        </div>
+                        <div class="option-item">
+                            <input type="radio" id="op-type2" name="operation-type" value="clone-to-new">
+                            <label for="op-type2">
+                                <strong>克隆到新账号</strong><br>
+                                <small>复制当前账号数据到另一个账号</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="custom-localid">自定义新的Local ID</label>
+                    <input type="text" id="custom-localid" placeholder="输入新的Local ID（10-20位字母数字）" required>
+                </div>
+                
+                <div id="target-credentials" class="hidden">
+                    <div class="form-group">
+                        <label for="target-email">目标账号邮箱</label>
+                        <input type="email" id="target-email" placeholder="输入目标账号邮箱">
+                    </div>
+                    <div class="form-group">
+                        <label for="target-password">目标账号密码</label>
+                        <input type="password" id="target-password" placeholder="输入目标账号密码">
+                    </div>
+                </div>
+                
+                <div class="warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>警告：</strong> 操作不可逆，请谨慎操作！
+                </div>
+                
+                <button id="clone-btn" class="btn btn-danger" style="width: 100%; margin-top: 20px;">
+                    <i class="fas fa-clone"></i> 修改当前账号ID
+                </button>
+                
+                <div id="clone-status" class="status"></div>
+            </div>
+            
+            <!-- 账号日志查看部分 -->
+            <div class="logs-section">
+                <h3><i class="fas fa-history"></i> 账号日志记录</h3>
+                
+                <div class="logs-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">日志总数:</span>
+                        <span class="stat-value" id="logs-total">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">最近登录:</span>
+                        <span class="stat-value" id="logs-last-login">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">登录次数:</span>
+                        <span class="stat-value" id="logs-login-count">0</span>
+                    </div>
+                </div>
+                
+                <div class="logs-controls">
+                    <select class="logs-filter" id="logs-filter-type">
+                        <option value="all">所有类型</option>
+                        <option value="login">登录记录</option>
+                        <option value="game">游戏记录</option>
+                        <option value="purchase">购买记录</option>
+                        <option value="system">系统记录</option>
+                        <option value="error">错误记录</option>
+                    </select>
+                    
+                    <input type="text" class="logs-search" id="logs-search" placeholder="搜索日志内容...">
+                    
+                    <button class="btn btn-secondary" id="refresh-logs-btn" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
+                        <i class="fas fa-sync-alt"></i> 刷新日志
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="export-logs-btn">
+                        <i class="fas fa-download"></i> 导出日志
+                    </button>
+                </div>
+                
+                <div class="logs-container" id="logs-container">
+                    <table class="logs-table" id="logs-table">
+                        <thead>
+                            <tr>
+                                <th width="150">时间</th>
+                                <th width="100">类型</th>
+                                <th>内容</th>
+                                <th width="150">IP地址</th>
+                                <th width="150">设备</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-body">
+                            <tr>
+                                <td colspan="5" class="no-logs">
+                                    <i class="fas fa-user-clock"></i>
+                                    请先登录账号查看日志
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="logs-status" class="status logs-status"></div>
+            </div>
+            
+            <!-- 状态显示部分 -->
+            <div class="status-section" style="margin-top: 30px;">
+                <h3><i class="fas fa-info-circle"></i> 操作进度状态</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                    <div class="progress-text" id="progress-text">准备开始...</div>
+                </div>
+                <div class="time-estimate" id="time-estimate">预计时间: --</div>
+                <div class="status-log" id="status-log">
+                    <div class="log-entry"><i class="fas fa-info-circle"></i> 系统已就绪，请先登录源账号</div>
+                </div>
+            </div>
+            
+            <!-- 退出登录按钮 -->
+            <div style="margin-top: 20px; text-align: center;">
+                <button id="logout-btn" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </button>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>CPMCY 账号克隆工具 v2.4 | 快手Jack制作</p>
+            <p class="disclaimer">仅供学习交流使用，请勿用于非法用途。使用本工具造成的任何问题，作者概不负责。</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
