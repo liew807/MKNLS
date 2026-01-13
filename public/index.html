@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站源码查看器 - 查看网站HTML/CSS/JS代码</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/material-darker.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔍 网站源码查看器</h1>
+            <p class="subtitle">实时查看任何网站的HTML、CSS和JavaScript源代码</p>
+        </header>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input 
+                    type="url" 
+                    id="urlInput" 
+                    placeholder="输入要查看的网站URL (例如: https://jbc518.onrender.com)"
+                    value="https://jbc518.onrender.com"
+                >
+                <button id="fetchBtn" class="btn-primary">
+                    <span class="btn-icon">📥</span> 获取源码
+                </button>
+                <button id="analyzeBtn" class="btn-secondary">
+                    <span class="btn-icon">🔍</span> 分析网站结构
+                </button>
+            </div>
+            
+            <div class="quick-links">
+                <span class="quick-label">快速查看:</span>
+                <button class="quick-btn" data-url="https://jbc518.onrender.com">jbc518</button>
+                <button class="quick-btn" data-url="https://github.com">GitHub</button>
+                <button class="quick-btn" data-url="https://stackoverflow.com">StackOverflow</button>
+                <button class="quick-btn" data-url="https://www.google.com">Google</button>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="url-info">
+                <span id="currentUrl">等待输入URL...</span>
+                <div class="status-info">
+                    <span id="status" class="status idle">🟢 就绪</span>
+                    <span id="responseTime"></span>
+                    <span id="contentLength"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="html">HTML 源码</button>
+            <button class="tab-btn" data-tab="resources">资源文件</button>
+            <button class="tab-btn" data-tab="headers">响应头</button>
+            <button class="tab-btn" data-tab="preview">页面预览</button>
+        </div>
+
+        <div class="tab-content active" id="html-tab">
+            <div class="code-header">
+                <h3>HTML 源代码</h3>
+                <div class="code-actions">
+                    <button id="copyHtmlBtn" class="btn-small">
+                        <span class="btn-icon">📋</span> 复制代码
+                    </button>
+                    <button id="formatBtn" class="btn-small">
+                        <span class="btn-icon">✨</span> 格式化
+                    </button>
+                    <button id="downloadBtn" class="btn-small">
+                        <span class="btn-icon">💾</span> 下载HTML
+                    </button>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="lineNumbers" checked> 显示行号
+                    </label>
+                </div>
+            </div>
+            <div class="code-container">
+                <textarea id="htmlCode" readonly></textarea>
+            </div>
+        </div>
+
+        <div class="tab-content" id="resources-tab">
+            <div class="resources-section">
+                <div class="resource-type">
+                    <h4><span class="icon">📜</span> JavaScript 文件</h4>
+                    <div id="scriptsList" class="resource-list"></div>
+                </div>
+                <div class="resource-type">
+                    <h4><span class="icon">🎨</span> CSS 样式表</h4>
+                    <div id="stylesheetsList" class="resource-list"></div>
+                </div>
+                <div class="resource-type">
+                    <h4><span class="icon">🖼️</span> 图片资源</h4>
+                    <div id="imagesList" class="resource-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="headers-tab">
+            <div class="headers-section">
+                <table id="headersTable">
+                    <thead>
+                        <tr>
+                            <th>Header 名称</th>
+                            <th>值</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="preview-tab">
+            <div class="preview-section">
+                <div class="preview-header">
+                    <h4>网站预览</h4>
+                    <div class="preview-actions">
+                        <button id="refreshPreview" class="btn-small">🔄 刷新预览</button>
+                        <button id="openExternal" class="btn-small">🌐 在新窗口打开</button>
+                    </div>
+                </div>
+                <div class="preview-frame">
+                    <iframe 
+                        id="previewFrame" 
+                        sandbox="allow-same-origin allow-scripts"
+                        title="网站预览"
+                    ></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📄</div>
+                    <div class="stat-content">
+                        <div class="stat-label">HTML 大小</div>
+                        <div class="stat-value" id="htmlSize">0 KB</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📜</div>
+                    <div class="stat-content">
+                        <div class="stat-label">JS 文件</div>
+                        <div class="stat-value" id="jsCount">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎨</div>
+                    <div class="stat-content">
+                        <div class="stat-label">CSS 文件</div>
+                        <div class="stat-value" id="cssCount">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🖼️</div>
+                    <div class="stat-content">
+                        <div class="stat-label">图片</div>
+                        <div class="stat-value" id="imageCount">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>网站源码查看器 v1.0 | 使用 Node.js + Axios + Cheerio 构建</p>
+            <p class="footer-note">
+                注意：本工具仅用于学习和分析网站结构，请遵守目标网站的使用条款。
+            </p>
+        </footer>
+    </div>
+
+    <!-- 模态框用于查看资源内容 -->
+    <div id="resourceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">资源内容</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="resourceCode" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
