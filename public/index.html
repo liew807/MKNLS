@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AOO工作室 | CPM Pro</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <div id="loading-text" data-i18n="processing">处理中...</div>
+    </div>
+
+    <div class="lang-selector">
+        <select id="lang-select" onchange="changeLanguage(this.value)">
+            <option value="zh">🇨🇳 中文</option>
+            <option value="en">🇺🇸 English</option>
+            <option value="jp">🇯🇵 日本語</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+            <option value="ms">🇲🇾 Bahasa Melayu</option>
+        </select>
+    </div>
+
+    <div id="modal-warning" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3 data-i18n="warning_title">⚠️ 严重警告</h3>
+            <p data-i18n="warning_text">此操作将<b>强制覆盖</b>当前账号所有进度！</p>
+            <div class="modal-check">
+                <input type="checkbox" id="chk-agree">
+                <label for="chk-agree" data-i18n="warning_agree">我已阅读并承担所有风险</label>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-dark" onclick="closeModal()" data-i18n="cancel">取消</button>
+                <button class="btn btn-red" id="btn-confirm-fix" disabled onclick="confirmInit()" data-i18n="confirm_fix">同意修复</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-delete-acc" class="modal-overlay" style="display: none;">
+        <div class="modal-box" style="border-color:red;">
+            <h3 style="color:red;" data-i18n="del_title">⛔ 永久删除账号</h3>
+            <p data-i18n="del_warn">确定要删除当前登录的账号吗？此操作<b>无法撤销</b>！数据将永久丢失！</p>
+            <p style="font-size:0.8rem;color:#888;" data-i18n="del_cost">* 消耗 1 次高级操作次数</p>
+            <div class="modal-actions">
+                <button class="btn btn-dark" onclick="document.getElementById('modal-delete-acc').style.display='none'" data-i18n="cancel">取消</button>
+                <button class="btn btn-red" onclick="doDeleteAccount()" data-i18n="confirm_del">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-car-mod" class="modal-overlay" style="display: none;">
+        <div class="modal-box" style="max-width:500px; max-height:85vh; overflow-y:auto;">
+            <h3 data-i18n="car_custom">🛠️ 车辆深度定制</h3>
+            <div style="background:#222; padding:10px; margin-bottom:10px; border-radius:4px; text-align:center;">
+                <label style="color:var(--accent-blue)" data-i18n="target_car_id">目标车辆ID</label>
+                <input type="text" id="car-mod-id" class="form-input" placeholder="12" style="text-align:center; font-size:1.2rem; width:100px;">
+            </div>
+
+            <div class="tabs" style="margin-bottom:10px;">
+                <button class="tab active" onclick="showCarTab('perf')" data-i18n="tab_perf">动力</button>
+                <button class="tab" onclick="showCarTab('visual')" data-i18n="tab_visual">外观</button>
+                <button class="tab" onclick="showCarTab('susp')" data-i18n="tab_susp">悬挂</button>
+            </div>
+
+            <div id="ctab-perf" class="car-tab-content">
+                <div class="limit-grid">
+                    <div>HP: <input type="number" id="cm-hp" placeholder="2000"></div>
+                    <div>Inner: <input type="number" id="cm-inner" placeholder="2000"></div>
+                    <div>NM: <input type="number" id="cm-nm" placeholder="3000"></div>
+                    <div>Torque: <input type="number" id="cm-tq" placeholder="3000"></div>
+                    <div data-i18n="camber">外倾角:</div><div><input type="number" id="cm-camber" placeholder="-10"></div>
+                </div>
+                <button class="btn btn-purple full-width" onclick="doModCarPerf()" data-i18n="btn_apply">应用修改</button>
+            </div>
+
+            <div id="ctab-visual" class="car-tab-content" style="display:none;">
+                <h4 data-i18n="bumpers">🎨 保险杠与尾翼</h4>
+                <div class="check-row" style="justify-content:space-around; margin-bottom:5px;">
+                    <div><input type="checkbox" id="cm-rm-f"><label for="cm-rm-f" data-i18n="rm_front"> 拆前杠</label></div>
+                    <div><input type="checkbox" id="cm-rm-r"><label for="cm-rm-r" data-i18n="rm_rear"> 拆后杠</label></div>
+                </div>
+                <div class="input-row" style="margin-bottom:15px;">
+                    <label data-i18n="spoiler_id">安装尾翼ID:</label>
+                    <input type="number" id="cm-spoiler-id" placeholder="1" style="width:80px;">
+                </div>
+                
+                <h4 data-i18n="paint_job">🌈 车漆定制 (支持电镀)</h4>
+                <div style="font-size:0.8rem; color:#888; margin-bottom:5px;" data-i18n="paint_tip">亮度 1.0 正常，>5.0 发光</div>
+                
+                <div class="color-row">
+                    <span data-i18n="col_body">车身:</span>
+                    <input type="color" id="cm-col-body">
+                    <input type="number" id="cm-br-body" placeholder="1.0" value="1.0" step="0.1" style="width:60px;">
+                </div>
+                <div class="color-row">
+                    <span data-i18n="col_ref">反光:</span>
+                    <input type="color" id="cm-col-ref">
+                    <input type="number" id="cm-br-ref" placeholder="1.0" value="1.0" step="0.1" style="width:60px;">
+                </div>
+                <div class="color-row">
+                    <span data-i18n="col_win">车窗:</span>
+                    <input type="color" id="cm-col-win">
+                    <input type="number" id="cm-br-win" placeholder="1.0" value="1.0" step="0.1" style="width:60px;">
+                </div>
+                <div class="color-row">
+                    <span data-i18n="col_rim">轮毂:</span>
+                    <input type="color" id="cm-col-rim">
+                    <input type="number" id="cm-br-rim" placeholder="1.0" value="1.0" step="0.1" style="width:60px;">
+                </div>
+                <div class="color-row">
+                    <span data-i18n="col_head">车灯:</span>
+                    <input type="color" id="cm-col-head">
+                    <span style="font-size:0.8rem; color:#666;">(Fixed)</span>
+                </div>
+
+                <h4 style="margin-top:15px;" data-i18n="wheels">🛞 轮毂改装</h4>
+                <div class="input-row">
+                    <input type="number" id="cm-rim-id" placeholder="ID">
+                    <input type="number" id="cm-rim-size" placeholder="Size (0.1-2.0)">
+                </div>
+
+                <button class="btn btn-blue full-width" onclick="doModCarVisual()" data-i18n="btn_apply">应用修改</button>
+            </div>
+
+            <div id="ctab-susp" class="car-tab-content" style="display:none;">
+                <div class="limit-grid">
+                    <div>Dist: <input type="number" id="cm-s-dist" placeholder="-0.1"></div>
+                    <div>Stiff: <input type="number" id="cm-s-stiff" placeholder="1.0"></div>
+                    <div>Steer: <input type="number" id="cm-s-steer" placeholder="60"></div>
+                    <div>Offset: <input type="number" id="cm-s-offset" placeholder="0.5"></div>
+                </div>
+                <button class="btn btn-green full-width" onclick="doModCarSuspension()" data-i18n="btn_apply">应用修改</button>
+            </div>
+
+            <div class="modal-actions" style="margin-top:15px; border-top:1px solid #333; padding-top:10px;">
+                <button class="btn btn-dark" onclick="document.getElementById('modal-car-mod').style.display='none'" data-i18n="close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-gen-key" class="modal-overlay" style="display: none;">
+        <div class="modal-box" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
+            <h3>生成新秘钥</h3>
+            <div class="admin-form">
+                <div style="background:rgba(255,0,0,0.1); padding:10px; border:1px solid red; margin-bottom:10px; border-radius:4px;">
+                    <input type="checkbox" id="k-is-test" onchange="toggleTestCard()">
+                    <label for="k-is-test" style="display:inline; color:var(--accent-red); font-weight:bold;">生成测试卡</label>
+                </div>
+                
+                <label>备注名称</label>
+                <input type="text" id="k-note" placeholder="例如：张三">
+                
+                <div style="background:#222; padding:10px; margin:5px 0; border:1px solid var(--accent-blue); border-radius:4px;">
+                    <label style="color:var(--accent-blue); font-weight:bold;">生成数量</label>
+                    <input type="number" id="k-count" value="1" min="1" max="100" style="width:100%; text-align:center; font-size:1.2rem; font-weight:bold;">
+                </div>
+                
+                <p style="font-size:10px; color:#888; margin:5px 0;">* 输入 N 或 -1 代表无限</p>
+                <div class="limit-grid">
+                    <div>有效期(时): <input type="text" id="k-duration" value="1"></div>
+                    <div>绑定设备数: <input type="text" id="k-max-dev" value="1"></div>
+                    <div>绑定账号数: <input type="text" id="k-max-acc" value="1"></div>
+                </div>
+                
+                <h4>基础资源修改</h4>
+                <div class="limit-grid">
+                    <div>修改金币: <input type="text" id="kl-coins" value="1"></div>
+                    <div>修改绿钞: <input type="text" id="kl-cash" value="1"></div>
+                    <div>修改名字: <input type="text" id="kl-name" value="1"></div>
+                    <div>修改胜场: <input type="text" id="kl-wins" value="1"></div>
+                    <div>修改败场: <input type="text" id="kl-loses" value="1"></div>
+                    <div>修改ID: <input type="text" id="kl-id" value="1"></div>
+                </div>
+
+                <h4>黑科技 (独立计数)</h4>
+                <div class="limit-grid">
+                    <div>W16引擎: <input type="text" id="kl-w16" value="1"></div>
+                    <div>无限燃油: <input type="text" id="kl-fuel" value="1"></div>
+                    <div>车辆无伤: <input type="text" id="kl-damage" value="1"></div>
+                    <div>彩色烟雾: <input type="text" id="kl-smoke" value="1"></div>
+                    <div>解锁房产: <input type="text" id="kl-houses" value="1"></div>
+                    <div>警车警灯: <input type="text" id="kl-police" value="1" style="border-color:var(--accent-red)"></div>
+                </div>
+
+                <h4>高级功能</h4>
+                <div class="limit-grid">
+                    <div>账号克隆: <input type="text" id="kl-clone" value="1"></div>
+                    <div>车辆改装: <input type="text" id="kl-car-mod" value="1" style="border-color:var(--accent-purple)" placeholder="外观/动力"></div>
+                    <div>修复/注册: <input type="text" id="kl-init" value="1"></div>
+                    <div>成就/删号: <input type="text" id="kl-unlock" value="1" style="border-color:gold"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-dark" onclick="document.getElementById('modal-gen-key').style.display='none'">取消</button>
+                <button class="btn btn-blue" onclick="confirmGenKey()">确认生成</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1 data-i18n="main_title">AOO工作室</h1>
+            <div class="subtitle">CPM 终极控制台 v7.1 Pro</div>
+        </header>
+
+        <section id="verify-view" class="panel">
+            <h3 style="text-align:center; margin-bottom:15px; color:var(--accent-blue);" data-i18n="auth_title">🔒 安全访问验证</h3>
+            <input type="text" id="v-key" placeholder="KSJBC..." class="form-input" style="text-align:center; font-family:monospace; text-transform:uppercase;">
+            <button class="btn btn-blue full-width" onclick="doVerify()" data-i18n="btn_verify">验证秘钥</button>
+
+            <div class="ad-box">
+                <p class="ad-title" data-i18n="ad_text">还不知道秘钥在哪里领取？<br>以下为AOO的联系方式👇</p>
+                <div class="ad-links">
+                    <a href="https://v.kuaishou.com/KYe1uUvx" target="_blank" class="btn btn-ad ks-color">📺AOO的快手</a>
+                    <a href="https://m.tb.cn/h.7jeBHD7?tk=PepJUXZAbNL" target="_blank" class="btn btn-ad xy-color">🐠AOO的闲鱼</a>
+                    <a href="https://t.me/cpmjbctool" target="_blank" class="btn btn-ad tg-color">✈️ Telegram</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-choice-view" class="panel" style="display: none;">
+            <h3 style="text-align:center;">👮 管理员选项</h3>
+            <div class="grid-buttons vertical">
+                <button class="btn btn-purple" onclick="enterAdminCenter()">后台管理中心</button>
+                <button class="btn btn-blue" onclick="enterUserCenterAsAdmin()">功能中心 (无限制)</button>
+                <button class="btn btn-dark" onclick="location.reload()">切换秘钥</button>
+            </div>
+        </section>
+
+        <section id="admin-view" style="display: none;">
+            <div class="panel">
+                <div class="logs-header" style="flex-wrap:wrap; gap:10px;">
+                    <h3>🔑 秘钥管理</h3>
+                    <div style="display:flex; gap:5px; flex-wrap: wrap;">
+                        <button class="btn btn-sm btn-green" onclick="openGenModal()">+ 生成</button>
+                        <button class="btn btn-sm btn-red" onclick="deleteExpiredKeys()">🗑️ 清理过期</button>
+                        <button class="btn btn-sm btn-blue" onclick="loadKeys()">🔄 刷新</button>
+                        <button class="btn btn-sm btn-dark" onclick="location.reload()">退出</button>
+                    </div>
+                </div>
+                <input type="text" id="key-search" class="form-input" placeholder="🔍 搜索..." onkeyup="filterKeys()">
+                <div id="keys-list" class="keys-container"></div>
+            </div>
+        </section>
+
+        <section id="auth-view" class="panel" style="display: none;">
+            <div id="key-alert-box" class="prominent-alert" style="display:none;">
+                <div class="alert-title" data-i18n="key_status_title">⚠️ 秘钥状态提醒</div>
+                <div class="alert-content">
+                    <div>⏳ <span data-i18n="key_expire">到期时间</span>: <span id="alert-expire" style="color:yellow;font-weight:bold;">Loading...</span></div>
+                    <div>⚡ <span data-i18n="key_remains">剩余次数</span>: <span id="alert-limits">Loading...</span></div>
+                </div>
+            </div>
+
+            <div class="warning-box" data-i18n="login_tip">
+                老季温馨提醒：<br>使用工具前请先保存数据并退出账号！<br>没退出账号导致修改失效，不退不补秘钥！
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('login')" data-i18n="tab_login">登录游戏账号</button>
+                <button class="tab" onclick="showTab('reg')" data-i18n="tab_reg">注册新号</button>
+            </div>
+            <div id="tab-login" class="tab-content">
+                <input type="email" id="l-email" placeholder="Email" class="form-input">
+                <input type="password" id="l-pass" placeholder="Password" class="form-input">
+                <button class="btn btn-blue full-width" onclick="doLogin()" data-i18n="btn_login_bind">登录并绑定</button>
+            </div>
+            <div id="tab-reg" class="tab-content" style="display:none;">
+                <p class="tip" data-i18n="reg_tip">注册将消耗 1 次修复次数</p>
+                <input type="email" id="r-email" placeholder="New Email" class="form-input">
+                <input type="password" id="r-pass" placeholder="Password" class="form-input">
+                <button class="btn btn-yellow full-width" onclick="doRegister()" data-i18n="btn_reg">注册</button>
+            </div>
+            <button class="btn btn-dark full-width" style="margin-top:10px;" onclick="location.reload()" data-i18n="btn_back">返回首页</button>
+        </section>
+
+        <div id="main-view" style="display: none;">
+            <div id="key-detail-box" class="panel" style="border:1px solid var(--accent-purple); display:none;">
+                <h4 style="margin:0 0 10px 0; color:var(--accent-purple); text-align:center;" data-i18n="key_detail">🔑 秘钥权益详情</h4>
+                <div class="key-info-grid">
+                    <div>📅 <span id="k-expiry" style="color:#fff; font-size:0.8rem;">Loading...</span></div>
+                    <div>📱 <span id="k-devs" style="color:#fff;">0/0</span></div>
+                    <div>👤 <span id="k-accs" style="color:#fff;">0/0</span></div>
+                </div>
+                <div id="recharge-alert" style="display:none; margin-top:10px; background:rgba(255,0,0,0.2); color:red; padding:10px; text-align:center; border:1px solid red; border-radius:4px; font-weight:bold;">
+                    ⚠️ 您的秘钥即将到期或次数不足！
+                </div>
+            </div>
+
+            <section class="panel dashboard glow">
+                <div class="user-info-grid">
+                    <div class="u-item large">
+                        <span class="label" data-i18n="lbl_email">当前账号</span>
+                        <span id="d-email" class="val" style="font-size: 0.9rem; color: #aaa;">Loading...</span>
+                    </div>
+                    <div class="u-item large">
+                        <span class="label" data-i18n="lbl_nick_id">昵称 / ID / 当前车ID</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                             <span id="d-name" class="val nickname">Loading...</span>
+                             <span id="d-id" class="val id">...</span>
+                             <span id="d-cur-car" class="val" style="font-size:0.8rem; color:#888;">...</span>
+                        </div>
+                    </div>
+                    <div class="u-item"><span class="label" data-i18n="lbl_coin">金币</span><span id="d-coin" class="val coin">0</span></div>
+                    <div class="u-item"><span class="label" data-i18n="lbl_cash">绿钞</span><span id="d-cash" class="val cash">0</span></div>
+                    <div class="u-item"><span class="label" data-i18n="lbl_level">等级</span><span id="d-level" class="val" style="color: #ff9f43;">0</span></div>
+                    <div class="u-item"><span class="label" data-i18n="lbl_cars">车辆数</span><span id="d-cars" class="val">0</span></div>
+                    <div class="u-item large" style="display:flex; justify-content: space-around;">
+                        <div style="text-align:center;">
+                            <span class="label" data-i18n="lbl_win">胜</span>
+                            <span id="d-wins" class="val win">0</span>
+                        </div>
+                        <div style="text-align:center;">
+                            <span class="label" data-i18n="lbl_lose">负</span>
+                            <span id="d-loses" class="val lose">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 5px; margin-top: 15px;">
+                    <button class="btn btn-sm btn-blue" onclick="doRefresh()" data-i18n="btn_refresh">🔄 刷新</button>
+                    <button id="btn-manual-fix" class="btn btn-sm btn-red" onclick="openFixModal()" data-i18n="btn_fix">一键修复</button>
+                    <button class="btn btn-sm btn-dark" onclick="logout()" data-i18n="btn_logout">退出</button>
+                </div>
+            </section>
+            
+            <details class="panel accordion">
+                <summary data-i18n="car_custom">🛠️ 车辆深度定制</summary>
+                <div class="acc-content">
+                    <p style="font-size:0.8rem; color:#888; text-align:center; margin-bottom:10px;" data-i18n="car_custom_tip">修改特定车辆的动力、外观、悬挂等</p>
+                    <div class="input-row">
+                        <input type="text" id="target-car-id" placeholder="ID" style="text-align:center;">
+                        <button id="btn-open-car-mod" class="btn btn-purple full-width" onclick="openCarModModal()" data-i18n="btn_mod_car_attr">进入改装</button>
+                    </div>
+                </div>
+            </details>
+
+            <details class="panel accordion" open>
+                <summary data-i18n="res_mod">✏️ 资源修改</summary>
+                <div class="acc-content">
+                    <div class="input-row">
+                        <input type="number" id="m-coin" placeholder="Amount">
+                        <button id="btn-mod-coins" class="btn btn-sm btn-green" onclick="modBase('coins')" data-i18n="btn_mod_coin">改金币</button>
+                    </div>
+                    <div class="input-row">
+                        <input type="number" id="m-cash" placeholder="Amount">
+                        <button id="btn-mod-cash" class="btn btn-sm btn-green" onclick="modBase('cash')" data-i18n="btn_mod_cash">改绿钞</button>
+                    </div>
+                    <div class="input-row">
+                        <input type="number" id="m-wins" placeholder="Amount">
+                        <button id="btn-mod-wins" class="btn btn-sm btn-green" onclick="modBase('wins')" data-i18n="btn_mod_win">改胜场</button>
+                    </div>
+                    <div class="input-row">
+                        <input type="number" id="m-loses" placeholder="Amount">
+                        <button id="btn-mod-loses" class="btn btn-sm btn-green" onclick="modBase('loses')" data-i18n="btn_mod_lose">改败场</button>
+                    </div>
+                    <div class="input-row">
+                        <input type="text" id="m-name" placeholder="Name">
+                        <button id="btn-mod-name" class="btn btn-sm btn-purple" onclick="modBase('name')" data-i18n="btn_mod_name">改名</button>
+                    </div>
+                    <div class="input-row">
+                        <input type="text" id="m-id" placeholder="Custom ID">
+                        <button id="btn-mod-id" class="btn btn-sm btn-purple" onclick="modBase('id')" data-i18n="btn_mod_id">改ID</button>
+                    </div>
+                </div>
+            </details>
+
+            <details class="panel accordion">
+                <summary data-i18n="tech_mod">🚀 黑科技</summary>
+                <div class="acc-content">
+                    <div class="grid-buttons">
+                        <button id="btn-tech-w16" class="btn btn-sm btn-dark" onclick="modTech('w16')">🔥 W16</button>
+                        <button id="btn-tech-fuel" class="btn btn-sm btn-dark" onclick="modTech('fuel')" data-i18n="btn_fuel">⛽ 油</button>
+                        <button id="btn-tech-damage" class="btn btn-sm btn-dark" onclick="modTech('damage')" data-i18n="btn_dmg">🛡️ 无伤</button>
+                        <button id="btn-tech-smoke" class="btn btn-sm btn-dark" onclick="modTech('smoke')" data-i18n="btn_smoke">💨 烟</button>
+                        <button id="btn-tech-houses" class="btn btn-sm btn-dark" onclick="modTech('houses')" data-i18n="btn_house">🏠 房</button>
+                        <button id="btn-mod-police" class="btn btn-sm btn-dark" onclick="modTech('police')" data-i18n="btn_police">🚨 警灯</button>
+                    </div>
+                    <h4 style="margin:15px 0 5px 0; border-top:1px solid #333; padding-top:10px;" data-i18n="global_unlock">🔓 全局解锁</h4>
+                    <div class="grid-buttons">
+                        <button id="btn-unlock-horns" class="btn btn-sm btn-purple" onclick="doGlobalUnlock('horns')" data-i18n="btn_unlock_horns">🎺 解锁喇叭</button>
+                        <button id="btn-unlock-all-cars" class="btn btn-sm btn-purple" onclick="doGlobalUnlock('all_cars')" data-i18n="btn_unlock_cars">🏎️ 解锁所有车</button>
+                        <button id="btn-unlock-levels" class="btn btn-sm btn-purple" onclick="doGlobalUnlock('levels')" data-i18n="btn_unlock_levels">🏆 解锁成就</button>
+                    </div>
+                </div>
+            </details>
+
+            <details class="panel accordion">
+                <summary data-i18n="acc_manage">👤 账号管理</summary>
+                <div class="acc-content">
+                    <div class="input-row" style="margin-top:15px;">
+                        <button id="btn-delete-acc" class="btn btn-red full-width" onclick="openDeleteModal()" data-i18n="btn_del_acc">❌ 删除当前账号</button>
+                    </div>
+                </div>
+            </details>
+
+            <details class="panel accordion">
+                <summary data-i18n="clone_mod">🧬 克隆</summary>
+                <div class="acc-content">
+                    <input type="email" id="c-email" placeholder="Target Email" class="form-input">
+                    <input type="password" id="c-pass" placeholder="Target Password" class="form-input">
+                    <div class="check-row"><input type="checkbox" id="c-auto"><label for="c-auto" data-i18n="auto_reg">自动注册</label></div>
+                    <button id="btn-mod-clone" class="btn btn-purple full-width" onclick="doClone()" data-i18n="btn_start_clone">开始克隆</button>
+                </div>
+            </details>
+<!-- 调试面板，放在 logs-panel 上方 -->
+<section class="panel" style="margin-top:20px;">
+    <div style="display:flex; justify-content:space-between;">
+        <h3 data-i18n="debug_tab">🔧 调试</h3>
+    </div>
+    <div>
+        <label data-i18n="debug_raw_response">原始 API 响应</label>
+        <pre id="debug-raw-response" style="background:#000; color:#0f0; padding:10px; border-radius:4px; overflow-x:auto; max-height:200px; font-size:11px; margin-top:5px;">暂无响应数据</pre>
+    </div>
+</section>
+            <section class="panel logs-panel">
+                <div class="logs-header"><h3 data-i18n="logs">📜 操作日志</h3><button class="btn btn-sm btn-outline" onclick="clearLogs()" data-i18n="clear">清空</button></div>
+                <div id="logs-container" class="logs-container"></div>
+            </section>
+        </div>
+        <div class="footer">AOO工作室 v7.1 Pro</div>
+    </div>
+    <script src="/js/app.js"></script>
+</body>
+</html>
